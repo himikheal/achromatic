@@ -1,9 +1,7 @@
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
+import java.awt.Point;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Body;
 
 class Solid extends Tile{
   private boolean coloured;
@@ -12,7 +10,9 @@ class Solid extends Tile{
   private boolean harmful;
 
   Solid(Point point, Sprite sprite, Body body) {
-    super(point, sprite, body);
+    this.setPoint(point);
+    this.setSprite(sprite);
+    this.setBody(body);
   }
 
   public boolean checkColour(String colour) {

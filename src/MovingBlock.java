@@ -1,3 +1,5 @@
+import java.awt.Point;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.physics.box2d.Body;
 
@@ -9,7 +11,7 @@ class MovingBlock extends Moving implements FloaterAI {
     this.points = points;
   }
   
-  public void move(this.points) {
+  public void move(Point[] points) {
 
   }
 }

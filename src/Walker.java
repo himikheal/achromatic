@@ -1,3 +1,8 @@
+import java.awt.Point;
+
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.physics.box2d.Body;
+
 class Walker extends Enemy implements WalkerAI {
   private Point[] points = new Point[2];
 

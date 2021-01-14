@@ -31,7 +31,7 @@ public class ColourGame implements ApplicationListener, ContactListener{
 	boolean drawSprite = true;
 
 	final float PIXELS_TO_METERS = 100f;
-	final float MAX_VELOCITY = 2f;
+	final float MAX_VELOCITY = 5f;
 	
 
 	public void create () {
@@ -39,6 +39,7 @@ public class ColourGame implements ApplicationListener, ContactListener{
 		batch = new SpriteBatch();
 		img = new Texture("assets/sprites/player.png");
 		player = new Sprite(img);
+		player.setSize(64, 64);
 
 		player.setPosition(- player.getWidth()/2, - player.getHeight()/2);
 
@@ -55,14 +56,23 @@ public class ColourGame implements ApplicationListener, ContactListener{
 		PolygonShape shape = new PolygonShape();
 		shape.setAsBox(player.getWidth() / 2 / PIXELS_TO_METERS, player.getHeight() / 2 / PIXELS_TO_METERS);
 
+
 		FixtureDef bodyFix = new FixtureDef();
 		bodyFix.shape = shape;
-		bodyFix.density = 0.5f;
-		bodyFix.friction = 1f;
+		bodyFix.density = 2f;
+		bodyFix.friction = 1.5f;
 		bodyFix.restitution = 0.0f;
+
+
+
 		pBody.createFixture(bodyFix);
 
 		shape.dispose();
+
+		FixtureDef platFix = new FixtureDef();
+		PolygonShape platShape = new PolygonShape();
+		platShape.setAsBox(128 / 2 / PIXELS_TO_METERS, 64 / 2 / PIXELS_TO_METERS, new Vector2(128/PIXELS_TO_METERS, -407/PIXELS_TO_METERS), 0f);
+		platFix.shape = platShape;
 
 		BodyDef edgeDef = new BodyDef();
 		edgeDef.type = BodyDef.BodyType.StaticBody;
@@ -78,7 +88,10 @@ public class ColourGame implements ApplicationListener, ContactListener{
 
 		screenEdge = gameWorld.createBody(edgeDef);
 		screenEdge.createFixture(edgeFix);
+		screenEdge.createFixture(platFix);
+
 		edgeShape.dispose();
+		platShape.dispose();
 
 		debug = new Box2DDebugRenderer();
 		font = new BitmapFont();
@@ -88,8 +101,9 @@ public class ColourGame implements ApplicationListener, ContactListener{
 
 	public void render () {
     System.out.println(jumping);
-		camera.update();
 		gameWorld.step(1f/60f, 6, 2);
+		camera.position.set(pBody.getPosition().x * PIXELS_TO_METERS, pBody.getPosition().y * PIXELS_TO_METERS, 0);
+		camera.update();
 
 		pBody.applyTorque(torque, true);
 		player.setPosition((pBody.getPosition().x * PIXELS_TO_METERS) - player.getWidth()/2, (pBody.getPosition().y * PIXELS_TO_METERS) - player.getHeight()/2);
@@ -123,7 +137,7 @@ public class ColourGame implements ApplicationListener, ContactListener{
 		if(Gdx.input.isKeyJustPressed(Keys.UP)){
 			if(!jumping){
 				System.out.println("jump");
-				pBody.applyLinearImpulse( 0, 5f, pos.x, pos.y, true);
+				pBody.applyLinearImpulse( 0, 7f, pos.x, pos.y, true);
 				this.jumping = true;
 				System.out.println(jumping + "1");
 			}
@@ -149,7 +163,7 @@ public class ColourGame implements ApplicationListener, ContactListener{
 		Fixture a = contact.getFixtureA();
 		Fixture b = contact.getFixtureB();
 		System.out.println(a.getBody().getType() + " has hit " + b.getBody().getType());
-		if(b.getBody().getUserData().equals("THEPLAYER")) {
+		if(b.getBody().getUserData() != null && b.getBody().getUserData().equals("THEPLAYER") || a.getBody().getUserData() != null && a.getBody().getUserData().equals("THEPLAYER")) {
 			this.jumping = false;
 		}
 		System.out.println(jumping + "2");
@@ -159,10 +173,6 @@ public class ColourGame implements ApplicationListener, ContactListener{
 		Fixture a = contact.getFixtureA();	
 		Fixture b = contact.getFixtureB();
 		System.out.println(a.getBody().getType() + " has stopped hitting " + b.getBody().getType());
-
-		if(b.getBody().getUserData().equals("THEPLAYER")){
-			System.out.println("?????");
-		}
 		System.out.println(jumping + "3");
 	}
  
