@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.physics.box2d.Body;
 
 class Solid extends Tile{
-  private boolean coloured;
-  private String colour;
+  private boolean coloured = false;
+  private int colour;
   private boolean toggled;
   private boolean harmful;
 
@@ -15,8 +15,20 @@ class Solid extends Tile{
     this.setBody(body);
   }
 
-  public boolean checkColour(String colour) {
-    return this.colour.equals(colour);
+  public boolean checkColour(int colour) {
+    return this.colour == colour;
+  }
+
+  public boolean isColoured() {
+    return this.coloured;
+  }
+
+  public void setColour(int colour){
+    this.colour = colour;
+  }
+
+  public void setColoured(boolean coloured){
+    this.coloured = coloured;
   }
 
   public boolean isHarmful() {
