@@ -48,7 +48,8 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 	  File levelFile;
 	  boolean jumping = false;
 	  int lvlH;
-	  int lvlW;
+    int lvlW;
+    int lvlNum;
   
 	  float torque = 0.0f;
 	  boolean drawSprite = true;
@@ -56,45 +57,17 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 	  final float PIXELS_TO_METERS = 64f;
 	  final float MAX_VELOCITY = 7f;
 
-    public GameScreen(ColourGame game) {
+    public GameScreen(ColourGame game, int level) {
       this.game = game;
+      this.lvlNum = level;
     }
 
     @Override
     public void show() {
       batch = new SpriteBatch();
-      //img = new Texture("assets/sprites/player.png");
-      //player = new Sprite(img);
-      //player.setSize(64, 64);
-  //
-      ////player.setPosition(- player.getWidth()/2, - player.getHeight()/2);
-      //player.setPosition(0, 0);
-  //
+ 
       gameWorld = new World(new Vector2(0, -15f), true);
       gameWorld.setContactListener(this);
-  //
-      //BodyDef bodyDef = new BodyDef();
-      //bodyDef.type = BodyDef.BodyType.DynamicBody;
-      //bodyDef.position.set((player.getX() + player.getWidth()/2)*PIXELS_TO_METERS, (player.getY() + player.getHeight()/2)*PIXELS_TO_METERS);
-      //pBody = gameWorld.createBody(bodyDef);
-      //pBody.setFixedRotation(true);
-      //pBody.setUserData("THEPLAYER");
-  //
-      //PolygonShape shape = new PolygonShape();
-      //shape.setAsBox(player.getWidth() / 2 / PIXELS_TO_METERS, player.getHeight() / 2 / PIXELS_TO_METERS);
-  //
-  //
-      //FixtureDef bodyFix = new FixtureDef();
-      //bodyFix.shape = shape;
-      //bodyFix.density = 2f;
-      //bodyFix.friction = 10f;
-      //bodyFix.restitution = 0.0f;
-  //
-  //
-  //
-      //pBody.createFixture(bodyFix);
-  //
-      //shape.dispose();
   
       FixtureDef platFix = new FixtureDef();
       PolygonShape platShape = new PolygonShape();
@@ -120,7 +93,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       edgeShape.dispose();
       platShape.dispose();
   
-      loadMap(new File("assets/levels/level_1.txt"));
+      loadMap(new File("assets/levels/level_" + lvlNum + ".txt"));
       //debug = new Box2DDebugRenderer();
       font = new BitmapFont();
       font.setColor(Color.BLACK);
@@ -193,7 +166,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
                 tile.setSprite(new Sprite(new Texture("assets/sprites/tileSprite" + ((Solid)tile).getColour() + "_1.png")));
               }
             }
-          }else if(tile instanceof Solid){
+          }else if(tile instanceof Solid && ((Solid)tile).isColoured()){
             tile.getBody().getFixtureList().get(0).setSensor(true);
             tile.setSprite(new Sprite(new Texture("assets/sprites/tileSprite" + ((Solid)tile).getColour() + "_2.png")));
           }
@@ -351,6 +324,28 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 
               levelMap[i][j] = new ColourGiver(new Point(i, j), sprite, body, Integer.parseInt(tileData[3]));
             }
+            if(tileData[0].equals("R")){
+              Texture tex = new Texture("assets/sprites/removerSprite.png");
+              Sprite sprite = new Sprite(tex);
+              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              Body body;
+              BodyDef def = new BodyDef();
+              def.type = BodyDef.BodyType.StaticBody;
+              def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
+              body = gameWorld.createBody(def);
+              body.setUserData("remover");
+
+              PolygonShape shape = new PolygonShape();
+              shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
+              FixtureDef fix = new FixtureDef();
+              fix.shape = shape;
+
+  
+              body.createFixture(fix).setSensor(true);
+              shape.dispose();
+
+              levelMap[i][j] = new ColourRemover(new Point(i, j), sprite, body);
+            }
           }
         }
         
@@ -370,9 +365,9 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     public void beginContact(Contact contact) {
       Fixture a = contact.getFixtureA();
       Fixture b = contact.getFixtureB();
-      if(b.getBody().getUserData() != null && b.getBody().getUserData().equals("THEPLAYER") ||
-          a.getBody().getUserData() != null && a.getBody().getUserData().equals("THEPLAYER") && 
-          !b.isSensor() || !a.isSensor()) 
+      if((b.getBody().getUserData() != null && b.getBody().getUserData().equals("THEPLAYER") ||
+          a.getBody().getUserData() != null && a.getBody().getUserData().equals("THEPLAYER")) && 
+          (!b.isSensor() && !a.isSensor())) 
       {
         System.out.println(a.getBody().getType() + " has hit " + b.getBody().getType());
         this.jumping = false;
@@ -387,6 +382,14 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         }else{
           player.addColour(Integer.parseInt(((String)a.getBody().getUserData()).substring(0, 1)));
         }
+        updateMap();
+      }
+      if((b.getBody().getUserData() != null && b.getBody().getUserData().equals("THEPLAYER") ||
+            a.getBody().getUserData() != null && a.getBody().getUserData().equals("THEPLAYER")) &&
+          (b.getBody().getUserData() != null && b.getBody().getUserData().equals("remover") || 
+            a.getBody().getUserData() != null && a.getBody().getUserData().equals("remover")))
+      {
+        player.clearColour();
         updateMap();
       }
     }

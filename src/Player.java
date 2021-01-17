@@ -23,7 +23,7 @@ class Player {
   }
 
   public void clearColour() {
-
+    this.colours.clear();
   }
 
   public void addColour(int colour) {
