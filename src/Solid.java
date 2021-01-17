@@ -19,6 +19,10 @@ class Solid extends Tile{
     return this.colour == colour;
   }
 
+  public int getColour(){
+    return this.colour;
+  }
+
   public boolean isColoured() {
     return this.coloured;
   }
