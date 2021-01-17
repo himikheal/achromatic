@@ -19,7 +19,7 @@ class Player {
   }
 
   public void respawn() {
-
+    this.body.setTransform(this.spawn.getBody().getPosition().x, this.spawn.getBody().getPosition().y, 0f);
   }
 
   public void clearColour() {
@@ -48,6 +48,14 @@ class Player {
 
   public void setSprite(Sprite sprite) {
     this.sprite = sprite;
+  }
+
+  public void setSpawn(Checkpoint spawn){
+    this.spawn = spawn;
+  }
+
+  public Checkpoint getSpawn(){
+    return this.spawn;
   }
 
   public Body getBody() {
