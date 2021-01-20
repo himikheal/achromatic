@@ -6,7 +6,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 
 class Player {
   private Checkpoint spawn;
-  private ArrayList<String> colours = new ArrayList<String>();
+  private ArrayList<Integer> colours = new ArrayList<Integer>();
   private Point point;
   private Sprite sprite;
   private Body body;
@@ -19,18 +19,18 @@ class Player {
   }
 
   public void respawn() {
-
+    this.body.setTransform(this.spawn.getBody().getPosition().x, this.spawn.getBody().getPosition().y, 0f);
   }
 
   public void clearColour() {
-
+    this.colours.clear();
   }
 
-  public void addColour(String colour) {
+  public void addColour(int colour) {
     this.colours.add(colour);
   }
 
-  public ArrayList<String> getColours() {
+  public ArrayList<Integer> getColours() {
     return this.colours;
   }
 
@@ -48,6 +48,14 @@ class Player {
 
   public void setSprite(Sprite sprite) {
     this.sprite = sprite;
+  }
+
+  public void setSpawn(Checkpoint spawn){
+    this.spawn = spawn;
+  }
+
+  public Checkpoint getSpawn(){
+    return this.spawn;
   }
 
   public Body getBody() {

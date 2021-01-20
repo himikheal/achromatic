@@ -1,11 +1,10 @@
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class TitleScreen extends ScreenAdapter {
   ColourGame game;
@@ -65,6 +64,9 @@ public class TitleScreen extends ScreenAdapter {
     //}
 
     game.batch.begin();
+    if(Gdx.input.isKeyJustPressed(Keys.Z)) {
+      game.setScreen(new EditorScreen(game));
+    }
     if(Gdx.input.getX() > startButtonSprite.getX() 
     && Gdx.input.getX() < startButtonSprite.getX() + startButtonSprite.getWidth() 
     && Gdx.input.getY() < startButtonSprite.getY() + startButtonSprite.getHeight() 

@@ -71,7 +71,7 @@ public class LevelScreen extends ScreenAdapter {
     && Gdx.input.getY() > levelOneSprite.getY() - levelOneSprite.getHeight()
     && Gdx.input.getY() < levelOneSprite.getY()) {
       if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-        game.setScreen(new GameScreen(game));
+        game.setScreen(new GameScreen(game, 1));
       }
       else {
         levelOneDownSprite.draw(game.batch);
@@ -85,7 +85,7 @@ public class LevelScreen extends ScreenAdapter {
     && Gdx.input.getY() > levelTwoSprite.getY() - levelTwoSprite.getHeight()
     && Gdx.input.getY() < levelTwoSprite.getY()) {
       if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-        game.setScreen(new GameScreen(game));
+        game.setScreen(new GameScreen(game, 2));
       }
       else {
         levelTwoDownSprite.draw(game.batch);
@@ -99,7 +99,7 @@ public class LevelScreen extends ScreenAdapter {
     && Gdx.input.getY() > levelThreeSprite.getY() - levelThreeSprite.getHeight()
     && Gdx.input.getY() < levelThreeSprite.getY()) {
       if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-        game.setScreen(new GameScreen(game));
+        game.setScreen(new GameScreen(game, 3));
       }
       else {
         levelThreeDownSprite.draw(game.batch);
@@ -113,7 +113,7 @@ public class LevelScreen extends ScreenAdapter {
     && Gdx.input.getY() > levelFourSprite.getY() - levelFourSprite.getHeight()
     && Gdx.input.getY() < levelFourSprite.getY()) {
       if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-        game.setScreen(new GameScreen(game));
+        game.setScreen(new GameScreen(game, 4));
       }
       else {
         levelFourDownSprite.draw(game.batch);
@@ -127,7 +127,7 @@ public class LevelScreen extends ScreenAdapter {
     && Gdx.input.getY() > levelFiveSprite.getY() - levelFiveSprite.getHeight()
     && Gdx.input.getY() < levelFiveSprite.getY()) {
       if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-        game.setScreen(new GameScreen(game));
+        game.setScreen(new GameScreen(game, 5));
       }
       else {
         levelFiveDownSprite.draw(game.batch);
