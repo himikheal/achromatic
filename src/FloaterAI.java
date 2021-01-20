@@ -1,5 +1,4 @@
-import java.awt.Point;
-
+import com.badlogic.gdx.math.Vector2;
 interface FloaterAI {
-  public void move(Point[] points);
+  public void move(Vector2[] points);
 }

@@ -6,6 +6,7 @@ import java.awt.Point;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.backends.headless.mock.audio.MockAudio;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -28,7 +29,9 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Filter;
+import com.badlogic.gdx.physics.box2d.RayCastCallback;
 
 import androidx.core.view.accessibility.AccessibilityViewCommand.SetSelectionArguments;
 
@@ -52,7 +55,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 	  int lvlH;
     int lvlW;
     int lvlNum;
-    
+
     final short PLAYER = 0x0002;
     final short TILE = 0x0004;
     final short BOX = 0x0008;
@@ -64,7 +67,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 	  boolean drawSprite = true;
   
 	  final float PIXELS_TO_METERS = 64f;
-	  final float MAX_VELOCITY = 7f;
+	  final float MAX_VELOCITY = 5f;
 
     public GameScreen(ColourGame game, int level) {
       this.game = game;
@@ -77,7 +80,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
  
       gameWorld = new World(new Vector2(0, -15f), true);
       gameWorld.setContactListener(this);
-  
+
       loadMap(new File("assets/levels/level_" + lvlNum + ".txt"));
       debug = new Box2DDebugRenderer();
       font = new BitmapFont();
@@ -87,6 +90,8 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 
     @Override
     public void render(float delta) {
+      updateBroken(Gdx.graphics.getDeltaTime());
+      updateMoving();
       if(dead){
         player.respawn();
         dead = false;
@@ -108,6 +113,14 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 
 		  for(int i = 0; i < levelMap.length; i++){
 		  	for(int j = 0; j < levelMap[0].length; j++){
+          if(levelMap[i][j] instanceof CrushingBlock){
+            ((CrushingBlock)levelMap[i][j]).update();
+            if(((CrushingBlock)levelMap[i][j]).isMoving()){
+              ((CrushingBlock)levelMap[i][j]).move();
+            }
+          }else if(levelMap[i][j] instanceof MovingBlock){
+            ((MovingBlock)levelMap[i][j]).move(((MovingBlock)levelMap[i][j]).getPoints());
+          }
           if(levelMap[i][j] != null){
 		  		  float bx = levelMap[i][j].getBody().getPosition().x;
 		  		  float by = levelMap[i][j].getBody().getPosition().y;
@@ -128,10 +141,10 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 		  Vector2 pos = player.getBody().getPosition();
 
 		  if(Gdx.input.isKeyPressed(Keys.LEFT) && vel.x > - MAX_VELOCITY){
-		  	player.getBody().applyLinearImpulse(-4f, 0, pos.x, pos.y, true);
+		  	player.getBody().applyLinearImpulse(-1.5f, 0, pos.x, pos.y, true);
 		  }
 		  if(Gdx.input.isKeyPressed(Keys.RIGHT) && vel.x < MAX_VELOCITY){
-		  	player.getBody().applyLinearImpulse( 4f, 0, pos.x, pos.y, true);
+		  	player.getBody().applyLinearImpulse( 1.5f, 0, pos.x, pos.y, true);
 		  }
 		  if(Gdx.input.isKeyJustPressed(Keys.UP)){
 		  	if(!jumping){
@@ -144,13 +157,99 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       
     }
 
+    public void updateMoving(){
+      for(Tile[] tiles: levelMap){
+        for(Tile tile: tiles){
+          if(tile instanceof Moving && player.getColours().size() > 0){
+            Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
+            for(int i = 0; i < player.getColours().size(); i++){
+              if(((Solid)tile).isColoured() && ((Solid)tile).checkColour((int)player.getColours().get(i))){
+                if(tile instanceof CrushingBlock){
+                  Body body = tile.getBody();
+                  body.setType(BodyType.KinematicBody);
+                  tile.setBody(body);
+                  filter.maskBits = -1;
+                  tile.getBody().getFixtureList().get(0).setFilterData(filter);
+                  tile.setSprite(new Sprite(new Texture("assets/sprites/crushSprite" + ((Solid)tile).getColour() + "_1.png")));
+                }else if(tile instanceof MovingBlock){
+                  Body body = tile.getBody();
+                  body.setType(BodyType.KinematicBody);
+                  tile.setBody(body);
+                  filter.maskBits = -1;
+                  tile.getBody().getFixtureList().get(0).setFilterData(filter);
+                  tile.setSprite(new Sprite(new Texture("assets/sprites/moveSprite" + ((Solid)tile).getColour() + "_1.png")));
+                }
+              }
+            }
+          }else if(tile instanceof Moving && ((Solid)tile).isColoured()){
+            Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
+            if(tile instanceof CrushingBlock){
+              Body body = tile.getBody();
+              body.setType(BodyType.StaticBody);
+              tile.setBody(body);
+              filter.maskBits = ~PLAYER;
+              tile.getBody().getFixtureList().get(0).setFilterData(filter);
+              tile.setSprite(new Sprite(new Texture("assets/sprites/crushSprite" + ((Solid)tile).getColour() + "_2.png")));
+            }else if(tile instanceof MovingBlock){
+              Body body = tile.getBody();
+              body.setType(BodyType.StaticBody);
+              tile.setBody(body);
+              filter.maskBits = ~PLAYER;
+              tile.getBody().getFixtureList().get(0).setFilterData(filter);
+              tile.setSprite(new Sprite(new Texture("assets/sprites/moveSprite" + ((Solid)tile).getColour() + "_2.png")));
+            }
+          }
+          if(tile instanceof CrushingBlock && ((CrushingBlock)tile).isMoving()){
+            if(((CrushingBlock)tile).isAggro()){
+              Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
+              filter.categoryBits = ENEMY;
+              tile.getBody().getFixtureList().get(0).setFilterData(filter);
+            }else{
+              Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
+              filter.categoryBits = TILE;
+              tile.getBody().getFixtureList().get(0).setFilterData(filter);
+            }
+          }
+        }
+      }
+    }
+
+    public void updateBroken(float time){
+      for(Tile[] tiles: levelMap){
+        for(Tile tile: tiles){
+          if(tile instanceof BrokenBlock && ((BrokenBlock)tile).getActive()){
+            Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
+            if(((BrokenBlock)tile).getElapsed() >= ((BrokenBlock)tile).getTimer()){
+              ((BrokenBlock)tile).setBroken(true);
+              ((BrokenBlock)tile).setActive(false);
+              ((BrokenBlock)tile).setElapsed(0);
+              filter.maskBits = ~PLAYER;
+              tile.getBody().getFixtureList().get(0).setFilterData(filter);
+              ((BrokenBlock)tile).setSprite(new Sprite(new Texture("assets/sprites/breakSprite" + ((BrokenBlock)tile).getColour() + "_3.png")));
+            }
+            ((BrokenBlock)tile).setElapsed(((BrokenBlock)tile).getElapsed() + time);
+          }else if(tile instanceof BrokenBlock && ((BrokenBlock)tile).getBroken()){
+            Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
+            if(((BrokenBlock)tile).getElapsed() >= ((BrokenBlock)tile).getTimer()){
+              ((BrokenBlock)tile).setBroken(false);
+              ((BrokenBlock)tile).setElapsed(0);
+              filter.maskBits = -1;
+              tile.getBody().getFixtureList().get(0).setFilterData(filter);
+              ((BrokenBlock)tile).setSprite(new Sprite(new Texture("assets/sprites/breakSprite" + ((BrokenBlock)tile).getColour() + "_1.png")));
+            }
+            ((BrokenBlock)tile).setElapsed(((BrokenBlock)tile).getElapsed() + time);
+          }
+        }
+      }
+    }
+
     public void updateMap(){
       for(Tile[] tiles: levelMap){
         for(Tile tile: tiles){
           if(tile instanceof Solid && player.getColours().size() > 0){
             Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
             for(int i = 0; i < player.getColours().size(); i++){
-              if(((Solid)tile).isColoured() && ((Solid)tile).checkColour((int)player.getColours().get(i))){
+              if(((Solid)tile).isColoured() && ((Solid)tile).checkColour((int)player.getColours().get(i)) && !(tile instanceof Moving)){
                 if(tile instanceof Spikes){
                   filter.maskBits = -1;
                   tile.getBody().getFixtureList().get(0).setFilterData(filter);
@@ -158,7 +257,11 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
                 }else if(tile instanceof PushableBlock){
                   filter.maskBits = -1;
                   tile.getBody().getFixtureList().get(0).setFilterData(filter);
-                  tile.setSprite(new Sprite(new Texture("assets/sprites/boxSprite" + ((Solid)tile).getColour() + "_2.png")));
+                  tile.setSprite(new Sprite(new Texture("assets/sprites/boxSprite" + ((Solid)tile).getColour() + "_1.png")));
+                }else if(tile instanceof BrokenBlock){
+                  filter.maskBits = -1;
+                  tile.getBody().getFixtureList().get(0).setFilterData(filter);
+                  tile.setSprite(new Sprite(new Texture("assets/sprites/breakSprite" + ((Solid)tile).getColour() + "_1.png")));
                 }else{
                   filter.maskBits = -1;
                   tile.getBody().getFixtureList().get(0).setFilterData(filter);
@@ -166,7 +269,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
                 }
               }
             }
-          }else if(tile instanceof Solid && ((Solid)tile).isColoured()){
+          }else if(tile instanceof Solid && ((Solid)tile).isColoured() && !(tile instanceof Moving)){
             Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
             if(tile instanceof Spikes){
               filter.maskBits = ~PLAYER;
@@ -175,7 +278,14 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             }else if(tile instanceof PushableBlock){
               filter.maskBits = ~PLAYER;
               tile.getBody().getFixtureList().get(0).setFilterData(filter);
-              tile.setSprite(new Sprite(new Texture("assets/sprites/boxSprite" + ((Solid)tile).getColour() + "_1.png")));
+              tile.setSprite(new Sprite(new Texture("assets/sprites/boxSprite" + ((Solid)tile).getColour() + "_2.png")));
+            }else if(tile instanceof BrokenBlock){
+              ((BrokenBlock)tile).setActive(false);
+              ((BrokenBlock)tile).setBroken(false);
+              ((BrokenBlock)tile).setElapsed(0);
+              filter.maskBits = ~PLAYER;
+              tile.getBody().getFixtureList().get(0).setFilterData(filter);
+              tile.setSprite(new Sprite(new Texture("assets/sprites/breakSprite" + ((Solid)tile).getColour() + "_2.png")));
             }else{
               filter.maskBits = ~PLAYER;
               tile.getBody().getFixtureList().get(0).setFilterData(filter);
@@ -394,7 +504,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 4 / PIXELS_TO_METERS);
               FixtureDef fix = new FixtureDef();
               fix.shape = shape;
-              fix.filter.categoryBits = SENSOR;
+              fix.filter.categoryBits = ENEMY;
   
               body.createFixture(fix);
               shape.dispose();
@@ -463,6 +573,101 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               }
               levelMap[i][j].getBody().setUserData(levelMap[i][j]);
             }
+            if(tileData[0].equals("X")){
+              Texture tex = new Texture("assets/sprites/breakSprite" + tileData[3] + "_" + tileData[1] + ".png");
+              Sprite sprite = new Sprite(tex);
+              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              Body body;
+              BodyDef def = new BodyDef();
+              def.type = BodyDef.BodyType.StaticBody;
+              def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
+              body = gameWorld.createBody(def);
+  
+              PolygonShape shape = new PolygonShape();
+              shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
+              FixtureDef fix = new FixtureDef();
+              fix.shape = shape;
+              fix.filter.categoryBits = TILE;
+  
+              body.createFixture(fix);
+              shape.dispose();
+  
+              levelMap[i][j] = new BrokenBlock(new Point(i, j), sprite, body, Integer.parseInt(tileData[2]));
+              if(Integer.parseInt(tileData[3]) != 0){
+                ((BrokenBlock)levelMap[i][j]).setColoured(true);
+                ((BrokenBlock)levelMap[i][j]).setColour(Integer.parseInt(tileData[3]));
+                fix.filter.maskBits = ~PLAYER;
+                levelMap[i][j].getBody().getFixtureList().get(0).setFilterData(fix.filter);
+              }
+              levelMap[i][j].getBody().setUserData(levelMap[i][j]);
+            }
+            if(tileData[0].equals("V")){
+              Texture tex = new Texture("assets/sprites/crushSprite" + tileData[3] + "_" + tileData[1] + ".png");
+              Sprite sprite = new Sprite(tex);
+              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              Body body;
+              BodyDef def = new BodyDef();
+              def.type = BodyDef.BodyType.StaticBody;
+              def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
+              body = gameWorld.createBody(def);
+  
+              PolygonShape shape = new PolygonShape();
+              shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
+              FixtureDef fix = new FixtureDef();
+              fix.shape = shape;
+              fix.filter.categoryBits = TILE;
+  
+              body.createFixture(fix);
+              shape.dispose();
+  
+              levelMap[i][j] = new CrushingBlock(new Point(i, j), sprite, body, Integer.parseInt(tileData[2]), gameWorld);
+              if(Integer.parseInt(tileData[3]) != 0){
+                ((CrushingBlock)levelMap[i][j]).setColoured(true);
+                ((CrushingBlock)levelMap[i][j]).setColour(Integer.parseInt(tileData[3]));
+                fix.filter.maskBits = ~PLAYER;
+                levelMap[i][j].getBody().getFixtureList().get(0).setFilterData(fix.filter);
+              }
+              levelMap[i][j].getBody().setUserData(levelMap[i][j]);
+            }
+            if(tileData[0].equals("-")){
+              Texture tex;
+              if(Integer.parseInt(tileData[3]) != 0){
+                tex = new Texture("assets/sprites/moveSprite" + tileData[3] + "_2.png");
+              }else{
+                tex = new Texture("assets/sprites/moveSprite0_1.png");
+              }
+              Sprite sprite = new Sprite(tex);
+              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              Body body;
+              BodyDef def = new BodyDef();
+              def.type = BodyDef.BodyType.KinematicBody;
+              def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
+              body = gameWorld.createBody(def);
+  
+              PolygonShape shape = new PolygonShape();
+              shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
+              FixtureDef fix = new FixtureDef();
+              fix.shape = shape;
+              fix.filter.categoryBits = TILE;
+  
+              body.createFixture(fix);
+              shape.dispose();
+  
+              Vector2 v1 = new Vector2(body.getPosition().x - Integer.parseInt(tileData[1]), j);
+              Vector2 v2 = new Vector2(body.getPosition().x + Integer.parseInt(tileData[2]), j);
+
+              levelMap[i][j] = new MovingBlock(new Point(i, j), sprite, body, new Vector2[]{v1, v2});
+              if(Integer.parseInt(tileData[3]) != 0){
+                ((MovingBlock)levelMap[i][j]).setColoured(true);
+                ((MovingBlock)levelMap[i][j]).setColour(Integer.parseInt(tileData[3]));
+                fix.filter.maskBits = ~PLAYER;
+                levelMap[i][j].getBody().getFixtureList().get(0).setFilterData(fix.filter);
+              }
+              levelMap[i][j].getBody().setUserData(levelMap[i][j]);
+              ((MovingBlock)levelMap[i][j]).setAxis(true);
+              ((MovingBlock)levelMap[i][j]).setDirection(true);
+            }
+
 
           }
         }
@@ -486,7 +691,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       Object obj1 = a.getBody().getUserData();
       Object obj2 = b.getBody().getUserData();
       if(obj2 instanceof Player || obj1 instanceof Player){
-        if(obj2 instanceof Spikes || obj1 instanceof Spikes){
+        if(b.getFilterData().categoryBits == ENEMY || a.getFilterData().categoryBits == ENEMY){
           dead = true;
         }
         if(obj2 instanceof Solid || obj1 instanceof Solid){
@@ -515,6 +720,16 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
           player.clearColour();
           updateMap();
         }
+        if(obj2 instanceof BrokenBlock || obj1 instanceof BrokenBlock){
+          if(obj2 instanceof BrokenBlock){
+            ((BrokenBlock)obj2).setActive(true);
+          }else{
+            ((BrokenBlock)obj1).setActive(true);
+          }
+        }
+      }
+      if(obj2 instanceof CrushingBlock || obj1 instanceof CrushingBlock){
+
       }
     }
    
