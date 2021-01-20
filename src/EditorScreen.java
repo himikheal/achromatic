@@ -56,6 +56,7 @@ public class EditorScreen extends ScreenAdapter {
   Texture[] giverTextures = new Texture[6];
   Texture[] spikesTextures = new Texture[7];
   Texture[] tileTextures = new Texture[7];
+  boolean spawnPlaced = false;
 
   EditorScreen(ColourGame game) {
     this.game = game;
@@ -113,6 +114,7 @@ public class EditorScreen extends ScreenAdapter {
       sr.line(630 + (i * 16.2f), 0f, 630 + (i * 16.2f), 810f);
       sr.line(630, (i * 16.2f), 1440, (i * 16.2f));
     }
+    sr.rect(16, Gdx.graphics.getHeight() - 160, 64, 64);
 
     sr.set(ShapeType.Filled);
 
@@ -150,8 +152,16 @@ public class EditorScreen extends ScreenAdapter {
         System.out.println("Grid Y: " + (int)(Gdx.input.getY() / 16.2));
         int gridX = (int)((Gdx.input.getX() - 630) / 16.2);
         int gridY = (int)(Gdx.input.getY() / 16.2);
-        //selected.setPoint(new Point(16.2 * gridX, 16.2 * gridY));
-        map[gridX][gridY] = selected;
+        if(!(selected instanceof Spawn) || (selected instanceof Spawn && !spawnPlaced)) {
+          if(selected == null && map[gridX][gridY] instanceof Spawn) {
+            spawnPlaced = false;
+          }
+          map[gridX][gridY] = selected;
+          if(selected instanceof Spawn) {
+            spawnPlaced = true;
+          }
+        }
+        
       }
     }
     if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
@@ -190,6 +200,13 @@ public class EditorScreen extends ScreenAdapter {
              && Gdx.input.getX() < 560) {
           selected = new Solid(null, new Sprite(tileSprite.getTexture()), null);
           System.out.println("TEST7");
+        }
+      }
+      else if(Gdx.input.getY() > 96 && Gdx.input.getY() < 160) {
+        if(Gdx.input.getX() > 16
+        && Gdx.input.getX() < 80) {
+          selected = null;
+          System.out.println("CLEAR");
         }
       }
       if(Gdx.input.getX() > 600 && Gdx.input.getX() < 630) {
