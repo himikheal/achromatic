@@ -30,6 +30,9 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+
+import org.lwjgl.Sys;
+
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.RayCastCallback;
 
@@ -89,7 +92,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     }
 
     @Override
-    public void render(float delta) {
+    public void render(float delta) { //make an iterating spriteVar counter for ez animation
       updateBroken(Gdx.graphics.getDeltaTime());
       updateMoving();
       if(dead){
@@ -120,6 +123,8 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             }
           }else if(levelMap[i][j] instanceof MovingBlock){
             ((MovingBlock)levelMap[i][j]).move(((MovingBlock)levelMap[i][j]).getPoints());
+          }else if(levelMap[i][j] instanceof Sticker){
+            ((Sticker)levelMap[i][j]).move(levelMap);
           }
           if(levelMap[i][j] != null){
 		  		  float bx = levelMap[i][j].getBody().getPosition().x;
@@ -133,7 +138,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       }
       player.getSprite().draw(batch);
 
-		  font.draw(batch, "Restitution: " + player.getBody().getFixtureList().first().getRestitution(), -Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		  batch.end();
 
       debug.render(gameWorld, matrix);
@@ -141,17 +145,15 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 		  Vector2 pos = player.getBody().getPosition();
 
 		  if(Gdx.input.isKeyPressed(Keys.LEFT) && vel.x > - MAX_VELOCITY){
-		  	player.getBody().applyLinearImpulse(-1.5f, 0, pos.x, pos.y, true);
+        player.getBody().applyLinearImpulse(-1.5f, 0, pos.x, pos.y, true);
 		  }
 		  if(Gdx.input.isKeyPressed(Keys.RIGHT) && vel.x < MAX_VELOCITY){
-		  	player.getBody().applyLinearImpulse( 1.5f, 0, pos.x, pos.y, true);
+        player.getBody().applyLinearImpulse( 1.5f, 0, pos.x, pos.y, true);
 		  }
 		  if(Gdx.input.isKeyJustPressed(Keys.UP)){
 		  	if(!jumping){
-		  		System.out.println("jump");
 		  		player.getBody().applyLinearImpulse( 0, 18f, pos.x, pos.y, true);
 		  		this.jumping = true;
-		  		System.out.println(jumping + "1");
 		  	}
 		  }
       
@@ -249,7 +251,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
           if(tile instanceof Solid && player.getColours().size() > 0){
             Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
             for(int i = 0; i < player.getColours().size(); i++){
-              if(((Solid)tile).isColoured() && ((Solid)tile).checkColour((int)player.getColours().get(i)) && !(tile instanceof Moving)){
+              if(((Solid)tile).isColoured() && ((Solid)tile).checkColour((int)player.getColours().get(i)) && (!(tile instanceof Moving) || tile instanceof PushableBlock)){
                 if(tile instanceof Spikes){
                   filter.maskBits = -1;
                   tile.getBody().getFixtureList().get(0).setFilterData(filter);
@@ -269,7 +271,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
                 }
               }
             }
-          }else if(tile instanceof Solid && ((Solid)tile).isColoured() && !(tile instanceof Moving)){
+          }else if(tile instanceof Solid && ((Solid)tile).isColoured() && (!(tile instanceof Moving) || tile instanceof PushableBlock)){
             Filter filter = tile.getBody().getFixtureList().get(0).getFilterData();
             if(tile instanceof Spikes){
               filter.maskBits = ~PLAYER;
@@ -342,7 +344,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("#")){
               Texture tex = new Texture("assets/sprites/tileSprite" + tileData[3] + "_" + tileData[1] + ".png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -371,7 +373,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("$")){
               Texture tex = new Texture("assets/sprites/spawnSprite_2.png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -395,7 +397,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               sprite = new Sprite(tex);
               sprite.setSize(64, 64);
 
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body pBody;
               BodyDef bodyDef = new BodyDef();
               bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -414,6 +416,8 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               bodyFix.restitution = 0.0f;
               bodyFix.filter.categoryBits = PLAYER;
               pBody.createFixture(bodyFix);
+              System.out.println(pBody.getPosition().x - 2048);
+              System.out.println(j);
 
               shape.dispose();
 
@@ -446,7 +450,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("G")){
               Texture tex = new Texture("assets/sprites/giverSprite_" + tileData[1] + ".png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -469,7 +473,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("R")){
               Texture tex = new Texture("assets/sprites/removerSprite.png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -493,7 +497,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("^")){
               Texture tex = new Texture("assets/sprites/spikeSprite" + tileData[3] + "_" + tileData[1] + ".png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -522,7 +526,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("*")){
               Texture tex = new Texture("assets/sprites/checkSprite_1.png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -545,7 +549,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("@")){
               Texture tex = new Texture("assets/sprites/boxSprite" + tileData[3] + "_" + tileData[1] + ".png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body boxBody;
               BodyDef boxDef = new BodyDef();
               boxDef.type = BodyDef.BodyType.DynamicBody;
@@ -576,7 +580,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("X")){
               Texture tex = new Texture("assets/sprites/breakSprite" + tileData[3] + "_" + tileData[1] + ".png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -604,7 +608,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             if(tileData[0].equals("V")){
               Texture tex = new Texture("assets/sprites/crushSprite" + tileData[3] + "_" + tileData[1] + ".png");
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.StaticBody;
@@ -637,7 +641,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
                 tex = new Texture("assets/sprites/moveSprite0_1.png");
               }
               Sprite sprite = new Sprite(tex);
-              sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
               BodyDef def = new BodyDef();
               def.type = BodyDef.BodyType.KinematicBody;
@@ -666,6 +670,80 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               levelMap[i][j].getBody().setUserData(levelMap[i][j]);
               ((MovingBlock)levelMap[i][j]).setAxis(true);
               ((MovingBlock)levelMap[i][j]).setDirection(true);
+            }
+            if(tileData[0].equals("|")){
+              Texture tex;
+              if(Integer.parseInt(tileData[3]) != 0){
+                tex = new Texture("assets/sprites/moveSprite" + tileData[3] + "_2.png");
+              }else{
+                tex = new Texture("assets/sprites/moveSprite0_1.png");
+              }
+              Sprite sprite = new Sprite(tex);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
+              Body body;
+              BodyDef def = new BodyDef();
+              def.type = BodyDef.BodyType.KinematicBody;
+              def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
+              body = gameWorld.createBody(def);
+  
+              PolygonShape shape = new PolygonShape();
+              shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
+              FixtureDef fix = new FixtureDef();
+              fix.shape = shape;
+              fix.filter.categoryBits = TILE;
+  
+              body.createFixture(fix);
+              shape.dispose();
+  
+              Vector2 v1 = new Vector2(body.getPosition().x - Integer.parseInt(tileData[1]), j);
+              Vector2 v2 = new Vector2(body.getPosition().x + Integer.parseInt(tileData[2]), j);
+
+              levelMap[i][j] = new MovingBlock(new Point(i, j), sprite, body, new Vector2[]{v1, v2});
+              if(Integer.parseInt(tileData[3]) != 0){
+                ((MovingBlock)levelMap[i][j]).setColoured(true);
+                ((MovingBlock)levelMap[i][j]).setColour(Integer.parseInt(tileData[3]));
+                fix.filter.maskBits = ~PLAYER;
+                levelMap[i][j].getBody().getFixtureList().get(0).setFilterData(fix.filter);
+              }
+              levelMap[i][j].getBody().setUserData(levelMap[i][j]);
+              ((MovingBlock)levelMap[i][j]).setAxis(false);
+              ((MovingBlock)levelMap[i][j]).setDirection(true);
+            }
+            if(tileData[0].equals("&")){
+              Texture tex;
+              if(Integer.parseInt(tileData[3]) != 0){
+                tex = new Texture("assets/sprites/stickSprite" + tileData[3] + "_2.png");
+              }else{
+                tex = new Texture("assets/sprites/stickSprite0_1.png");
+              }
+              Sprite sprite = new Sprite(tex);
+              sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
+              Body body;
+              BodyDef def = new BodyDef();
+              def.type = BodyDef.BodyType.KinematicBody;
+              def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
+              body = gameWorld.createBody(def);
+  
+              PolygonShape shape = new PolygonShape();
+              shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
+              FixtureDef fix = new FixtureDef();
+              fix.shape = shape;
+              fix.filter.categoryBits = ENEMY;
+  
+              body.createFixture(fix);
+              shape.dispose();
+            
+
+              levelMap[i][j] = new Sticker(new Point(i, j), sprite, body, Integer.parseInt(tileData[1]), Integer.parseInt(tileData[2]));
+              
+              if(Integer.parseInt(tileData[3]) != 0){
+                ((Sticker)levelMap[i][j]).setColoured(true);
+                ((Sticker)levelMap[i][j]).setColour(Integer.parseInt(tileData[3]));
+                fix.filter.maskBits = ~PLAYER;
+                levelMap[i][j].getBody().getFixtureList().get(0).setFilterData(fix.filter);
+              }
+              levelMap[i][j].getBody().setUserData(levelMap[i][j]);
+              ((Sticker)levelMap[i][j]).setClockwise(true);
             }
 
 

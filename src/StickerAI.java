@@ -1,3 +1,3 @@
 interface StickerAI {
-  public void move(int direction); // Starts upwards goes clockwise
+  public void move(Tile[][] levelMap); // Starts upwards goes clockwise
 }
