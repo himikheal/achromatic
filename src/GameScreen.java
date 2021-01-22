@@ -57,8 +57,9 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     boolean dead = false;
 	  int lvlH;
     int lvlW;
-    int lvlNum;
-
+    //int lvlNum;
+    String levelName;
+    
     final short PLAYER = 0x0002;
     final short TILE = 0x0004;
     final short BOX = 0x0008;
@@ -72,9 +73,9 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 	  final float PIXELS_TO_METERS = 64f;
 	  final float MAX_VELOCITY = 5f;
 
-    public GameScreen(ColourGame game, int level) {
+    public GameScreen(ColourGame game, String levelName) {
       this.game = game;
-      this.lvlNum = level;
+      this.levelName = levelName;
     }
 
     @Override
@@ -83,8 +84,9 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
  
       gameWorld = new World(new Vector2(0, -15f), true);
       gameWorld.setContactListener(this);
-
-      loadMap(new File("assets/levels/level_" + lvlNum + ".txt"));
+  
+      //loadMap(new File("assets/levels/level_" + lvlNum + ".txt"));
+      loadMap(new File("assets/levels/" + levelName));
       debug = new Box2DDebugRenderer();
       font = new BitmapFont();
       font.setColor(Color.BLACK);
@@ -138,6 +140,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       }
       player.getSprite().draw(batch);
 
+		  font.draw(batch, "Restitution: " + player.getBody().getFixtureList().first().getRestitution(), -Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		  batch.end();
 
       debug.render(gameWorld, matrix);
@@ -334,12 +337,14 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         levelMap = new Tile[lvlH][lvlW];
   
         for(int i = 0; i < lvlH; i++){
+          System.out.println("");
           for(int j = 0; j < lvlW; j++){
             String[] tileData = new String[4];
             String st = level[i][j];
             for(int k = 0; k < 4; k++){
               tileData[k] = st.substring(k, k+1);
             }
+            System.out.print(tileData[0]);
   
             if(tileData[0].equals("#")){
               Texture tex = new Texture("assets/sprites/tileSprite" + tileData[3] + "_" + tileData[1] + ".png");
@@ -448,7 +453,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
             //  levelMap[i][j].getBody().setUserData(levelMap[i][j]);
             //}
             if(tileData[0].equals("G")){
-              Texture tex = new Texture("assets/sprites/giverSprite_" + tileData[1] + ".png");
+              Texture tex = new Texture("assets/sprites/giverSprite_" + tileData[3] + ".png");
               Sprite sprite = new Sprite(tex);
               sprite.setPosition(j / PIXELS_TO_METERS, Gdx.graphics.getHeight() - (i / PIXELS_TO_METERS));
               Body body;
@@ -467,7 +472,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               body.createFixture(fix).setSensor(true);
               shape.dispose();
 
-              levelMap[i][j] = new ColourGiver(new Point(i, j), sprite, body, Integer.parseInt(tileData[3]));
+              levelMap[i][j] = new ColourGiver(new Point(i, j), sprite, body, Integer.parseInt(tileData[1]));
               levelMap[i][j].getBody().setUserData(levelMap[i][j]);
             }
             if(tileData[0].equals("R")){
@@ -532,7 +537,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               def.type = BodyDef.BodyType.StaticBody;
               def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
               body = gameWorld.createBody(def);
-  
               PolygonShape shape = new PolygonShape();
               shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
               FixtureDef fix = new FixtureDef();
