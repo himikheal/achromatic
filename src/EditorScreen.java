@@ -1,5 +1,12 @@
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.Socket;
+import java.nio.file.Files;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -48,6 +55,7 @@ public class EditorScreen extends ScreenAdapter {
   Texture tileB = new Texture("assets/sprites/tileSprite5_2.png");
   Texture tileP = new Texture("assets/sprites/tileSprite6_2.png");
   Texture playButton = new Texture("assets/sprites/playButton.png");
+  Texture uploadButton = new Texture("assets/sprites/uploadButton.png");
   Sprite boxSprite = new Sprite(box);
   Sprite checkpointSprite = new Sprite(checkpoint);
   Sprite giverSprite = new Sprite(giverR);
@@ -56,6 +64,7 @@ public class EditorScreen extends ScreenAdapter {
   Sprite spikesSprite = new Sprite(spikes);
   Sprite tileSprite = new Sprite(tile);
   Sprite playButtonSprite = new Sprite(playButton);
+  Sprite uploadButtonSprite = new Sprite(uploadButton);
   int colour = 0;
   Texture[] boxTextures = new Texture[7];
   Texture[] giverTextures = new Texture[6];
@@ -66,6 +75,9 @@ public class EditorScreen extends ScreenAdapter {
   Tile[] tileTypes = new Tile[] {new PushableBlock(null, null, null, 0)
                                , new Spikes(null, null, null)
                                , new Solid(null, null, null)};
+  private Socket socket;
+  private ObjectInputStream input;
+  private ObjectOutputStream output;
 
   EditorScreen(ColourGame game) {
     this.game = game;
@@ -85,6 +97,8 @@ public class EditorScreen extends ScreenAdapter {
     tileSprite.setPosition(496, Gdx.graphics.getHeight() - 80);
     playButtonSprite.setSize(174, 78);
     playButtonSprite.setPosition(10, 10);
+    uploadButtonSprite.setSize(246,78);
+    uploadButtonSprite.setPosition(200, 10);
     boxTextures[0] = box;
     boxTextures[1] = boxR;
     boxTextures[2] = boxO;
@@ -268,52 +282,121 @@ public class EditorScreen extends ScreenAdapter {
         spikesSprite.setTexture(spikesTextures[colour]);
         tileSprite.setTexture(tileTextures[colour]);
       }
-      if(Gdx.input.getX() > 10    //HEIGHT 78
-      && Gdx.input.getX() < 184
-      && Gdx.input.getY() < Gdx.graphics.getHeight() - 10
-      && Gdx.input.getY() > Gdx.graphics.getHeight() - 88
-      && spawnPlaced) {
-        System.out.println("PLAYED");
-        try {
-          PrintWriter writer = new PrintWriter("assets/levels/tempMap.txt");
-          writer.println("50");
-          writer.println("50");
-          for(int i = 0; i < map.length; i++) {
-            for(int j = 0; j < map.length; j++) {
-              if(map[j][i] instanceof Spawn) {
-                writer.print("$000");
-              }
-              else if(map[j][i] instanceof Checkpoint) {
-                writer.print("*000");
-              }
-              else if(map[j][i] instanceof ColourRemover) {
-                writer.print("R000");
-              }
-              else if(map[j][i] instanceof ColourGiver) {
-                writer.print("G" + ((ColourGiver)map[j][i]).getColour() + "0" + ((ColourGiver)map[j][i]).getColour());
-              }
-              else if(map[j][i] == null) {
-                writer.print("~100");
-              }
-              else {
-                for(int k = 0; k < tileTypes.length; k++) {
-                  if(map[j][i].getClass() == tileTypes[k].getClass()) {
-                    int solid = 2;
-                    if(((Solid)map[j][i]).getColour() == 0) {
-                      solid = 1;
+      if(Gdx.input.getY() < Gdx.graphics.getHeight() - 10
+      && Gdx.input.getY() > Gdx.graphics.getHeight() - 88) {
+        if(Gdx.input.getX() > 10    //HEIGHT 78
+        && Gdx.input.getX() < 184
+        && spawnPlaced) {
+          System.out.println("PLAYED");
+          try {
+            PrintWriter writer = new PrintWriter("assets/levels/tempMap.txt", "UTF-8");
+            writer.println("50");
+            writer.println("50");
+            for(int i = 0; i < map.length; i++) {
+              for(int j = 0; j < map.length; j++) {
+                if(map[j][i] instanceof Spawn) {
+                  writer.print("$000");
+                }
+                else if(map[j][i] instanceof Checkpoint) {
+                  writer.print("*000");
+                }
+                else if(map[j][i] instanceof ColourRemover) {
+                  writer.print("R000");
+                }
+                else if(map[j][i] instanceof ColourGiver) {
+                  writer.print("G" + ((ColourGiver)map[j][i]).getColour() + "0" + ((ColourGiver)map[j][i]).getColour());
+                }
+                else if(map[j][i] == null) {
+                  writer.print("~100");
+                }
+                else {
+                  for(int k = 0; k < tileTypes.length; k++) {
+                    if(map[j][i].getClass() == tileTypes[k].getClass()) {
+                      int solid = 2;
+                      if(((Solid)map[j][i]).getColour() == 0) {
+                        solid = 1;
+                      }
+                      writer.print(tileChars[k] + solid + "0" + ((Solid)map[j][i]).getColour());
                     }
-                    writer.print(tileChars[k] + solid + "0" + ((Solid)map[j][i]).getColour());
                   }
                 }
+                writer.print(" ");
               }
-              writer.print(" ");
+              writer.println("");
             }
-            writer.println("");
+            writer.close();
+            game.setScreen(new GameScreen(game, "tempMap.txt"));
+          } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+          } catch (UnsupportedEncodingException e2) {
+            System.out.println("Unsupported encoding");
           }
-          writer.close();
-          game.setScreen(new GameScreen(game, "tempMap.txt"));
-        } catch (FileNotFoundException e) {
-          System.out.println("File not found");
+        }
+        else if(Gdx.input.getX() > 200
+             && Gdx.input.getX() < 446) {
+          System.out.println("UPLOAD");
+          try {
+            PrintWriter writer = new PrintWriter("assets/levels/uploadMap.txt", "UTF-8");
+            writer.println("50");
+            writer.println("50");
+            for(int i = 0; i < map.length; i++) {
+              for(int j = 0; j < map.length; j++) {
+                if(map[j][i] instanceof Spawn) {
+                  writer.print("$000");
+                }
+                else if(map[j][i] instanceof Checkpoint) {
+                  writer.print("*000");
+                }
+                else if(map[j][i] instanceof ColourRemover) {
+                  writer.print("R000");
+                }
+                else if(map[j][i] instanceof ColourGiver) {
+                  writer.print("G" + ((ColourGiver)map[j][i]).getColour() + "0" + ((ColourGiver)map[j][i]).getColour());
+                }
+                else if(map[j][i] == null) {
+                  writer.print("~100");
+                }
+                else {
+                  for(int k = 0; k < tileTypes.length; k++) {
+                    if(map[j][i].getClass() == tileTypes[k].getClass()) {
+                      int solid = 2;
+                      if(((Solid)map[j][i]).getColour() == 0) {
+                        solid = 1;
+                      }
+                      writer.print(tileChars[k] + solid + "0" + ((Solid)map[j][i]).getColour());
+                    }
+                  }
+                }
+                writer.print(" ");
+              }
+              writer.println("");
+            }
+            writer.close();
+          } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+          } catch (UnsupportedEncodingException e2) {
+            System.out.println("Unsupported encoding");
+          }
+          connect("127.0.0.1", 5000);
+          try {
+            output.writeObject("/UPLOAD!");
+            File tempFile = new File("assets/levels/uploadMap.txt");
+            
+            System.out.println(tempFile.getAbsolutePath());
+            byte[] fileBytes = Files.readAllBytes(tempFile.toPath());
+            output.writeObject(fileBytes);
+            String o = (String) input.readObject();
+            System.out.println("Your map code is " + o);
+            
+            input.close();
+            output.close();
+            socket.close();
+          } catch(IOException e) {
+            System.out.println("IOException occured");
+            e.printStackTrace();
+          } catch(ClassNotFoundException e2) {
+            System.out.println("Class not found");
+          }
         }
       }
     }
@@ -330,6 +413,7 @@ public class EditorScreen extends ScreenAdapter {
     spikesSprite.draw(game.batch);
     tileSprite.draw(game.batch);
     playButtonSprite.draw(game.batch);
+    uploadButtonSprite.draw(game.batch);
 
     for(int i = 0; i < map.length; i++) {
       for(int j = 0; j < map.length; j++) {
@@ -347,4 +431,23 @@ public class EditorScreen extends ScreenAdapter {
   public void hide() {
     
   }
+
+  public Socket connect(String ip, int port) {
+    System.out.println("Attempting to make a connection..");
+
+    try {
+
+      socket = new Socket("127.0.0.1", 5000); //attempt socket connection (local address). This will wait until a connection is made
+      output = new ObjectOutputStream(socket.getOutputStream());
+      input = new ObjectInputStream(socket.getInputStream());
+      
+    } catch (IOException e) {  //connection error occured
+      System.out.println("Connection to Server Failed");
+      e.printStackTrace();
+    }
+    
+    System.out.println("Connection made.");
+    return socket;
+  }
+
 }
