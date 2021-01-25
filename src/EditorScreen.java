@@ -922,9 +922,11 @@ public class EditorScreen extends ScreenAdapter {
   }
 
   public void loadMap(File file){
+    spawnPlaced = true;
+    goalPlaced = true;
     BufferedReader reader;
     String[][] level;
-    Tile[][] levelMap;
+    //Tile[][] levelMap;
     try{
       reader = new BufferedReader(new FileReader(file));
       lvlH = Integer.parseInt(reader.readLine());
@@ -944,7 +946,7 @@ public class EditorScreen extends ScreenAdapter {
         }
       }
       
-      levelMap = new Tile[lvlH][lvlW];
+      //levelMap = new Tile[lvlH][lvlW];
 
       for(int i = 0; i < lvlH; i++){
         System.out.println("");
@@ -1085,7 +1087,7 @@ public class EditorScreen extends ScreenAdapter {
             int p1 = Integer.parseInt(tileData[1]);
             int p2 = Integer.parseInt(tileData[2]);
 
-            levelMap[j][i] = new Floater(null, sprite, null, new int[]{p1, p2});
+            map[j][i] = new Floater(null, sprite, null, new int[]{p1, p2});
             if(Integer.parseInt(tileData[3]) != 0){
               ((Floater)map[j][i]).setColour(Integer.parseInt(tileData[3]));
             }
@@ -1111,7 +1113,7 @@ public class EditorScreen extends ScreenAdapter {
             int p1 = Integer.parseInt(tileData[1]);
             int p2 = Integer.parseInt(tileData[2]);
 
-            levelMap[j][i] = new Walker(null, sprite, null, new int[]{p1, p2});
+            map[j][i] = new Walker(null, sprite, null, new int[]{p1, p2});
             if(Integer.parseInt(tileData[3]) != 0){
               ((Walker)map[j][i]).setColour(Integer.parseInt(tileData[3]));
             }
