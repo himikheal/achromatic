@@ -149,7 +149,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 		  player.getSprite().setPosition((player.getBody().getPosition().x * PIXELS_TO_METERS) - player.getSprite().getWidth()/2, (player.getBody().getPosition().y * PIXELS_TO_METERS) - player.getSprite().getHeight()/2);
 		  player.getSprite().setRotation((float)Math.toDegrees(player.getBody().getAngle()));
 
-		  Gdx.gl.glClearColor(1, 1, 1, 1);
+		  Gdx.gl.glClearColor(0, 0, 0, 1);
 		  Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		  batch.setProjectionMatrix(camera.combined);
@@ -524,11 +524,16 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               pBody.setFixedRotation(true);
 
               PolygonShape pShape = new PolygonShape();
-              pShape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS / 2, sprite.getHeight() / 2.2f / PIXELS_TO_METERS);
+              //pShape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS / 2, sprite.getHeight() / 2.2f / PIXELS_TO_METERS);
+
+              Vector2 coord = new Vector2(sprite.getWidth()/2/PIXELS_TO_METERS, sprite.getHeight()/2/PIXELS_TO_METERS);
+              Vector2[] verts = new Vector2[]{new Vector2(coord.x-0.2f, coord.y), new Vector2(coord.x-0.8f, coord.y), new Vector2(coord.x-0.8f, coord.y-0.98f), new Vector2(coord.x-0.5f, coord.y-1), new Vector2(coord.x-0.2f, coord.y-0.98f)};
+
+              pShape.set(verts);
   
               FixtureDef bodyFix = new FixtureDef();
               bodyFix.shape = pShape;
-              bodyFix.density = 4f;
+              bodyFix.density = 3.7f;
               bodyFix.friction = 10f;
               bodyFix.restitution = 0.0f;
               bodyFix.filter.categoryBits = PLAYER;
