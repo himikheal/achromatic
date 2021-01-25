@@ -6,16 +6,21 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import androidx.core.view.accessibility.AccessibilityViewCommand.SetProgressArguments;
+
 public class TitleScreen extends ScreenAdapter {
   ColourGame game;
   //private SpriteBatch batch;
   private Texture startButton = new Texture("assets/sprites/startButton.png");
   private Texture startButtonDown = new Texture("assets/sprites/startButtonDown.png");
   private Texture startButtonClicked = new Texture("assets/sprites/startButtonClicked.png");
+  private Texture editorButton = new Texture("assets/sprites/editorButton.png");
+  private Texture customButton = new Texture("assets/sprites/customButton.png");
   private Sprite startButtonSprite = new Sprite(startButton);
   private Sprite startButtonDownSprite = new Sprite(startButtonDown);
   private Sprite startButtonClickedSprite = new Sprite(startButtonClicked);
-  
+  private Sprite editorButtonSprite = new Sprite(editorButton);
+  private Sprite customButtonSprite = new Sprite(customButton);
 
   public TitleScreen(ColourGame game) {
     this.game = game;
@@ -26,9 +31,13 @@ public class TitleScreen extends ScreenAdapter {
     startButtonSprite.setSize(256, 101);
     startButtonDownSprite.setSize(256, 101);
     startButtonClickedSprite.setSize(256, 101);
+    editorButtonSprite.setSize(256, 101);
+    customButtonSprite.setSize(256, 101);
     startButtonSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - startButtonSprite.getHeight()/2);
     startButtonDownSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonDownSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - startButtonDownSprite.getHeight()/2);
     startButtonClickedSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonClickedSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - startButtonClickedSprite.getHeight()/2);
+    editorButtonSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonSprite.getWidth(), Gdx.graphics.getHeight()/2 - startButtonSprite.getHeight()*2);
+    customButtonSprite.setPosition(Gdx.graphics.getWidth()/2 , Gdx.graphics.getHeight()/2 - startButtonSprite.getHeight()*2);
 
     //Gdx.input.setInputProcessor(new InputAdapter() {
     //  @Override
@@ -64,11 +73,30 @@ public class TitleScreen extends ScreenAdapter {
     //}
 
     game.batch.begin();
-    if(Gdx.input.isKeyJustPressed(Keys.Z)) {
-      game.setScreen(new EditorScreen(game));
+    //if(Gdx.input.isKeyJustPressed(Keys.Z)) {
+    //  game.setScreen(new EditorScreen(game));
+    //}
+    if(Gdx.input.getX() > editorButtonSprite.getX() 
+    && Gdx.input.getX() < editorButtonSprite.getX() + editorButtonSprite.getWidth() 
+    && Gdx.input.getY() < Gdx.graphics.getHeight() - editorButtonSprite.getY() 
+    && Gdx.input.getY() > Gdx.graphics.getHeight() - editorButtonSprite.getY() - editorButtonSprite.getHeight()) {
+      if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+        game.setScreen(new EditorScreen(game));
+        this.dispose();
+      }
     }
-    if(Gdx.input.isKeyJustPressed(Keys.X)) {
-      game.setScreen(new CustomLevelScreen(game));
+    //if(Gdx.input.isKeyJustPressed(Keys.X)) {
+    //  game.setScreen(new CustomLevelScreen(game));
+    //}
+    if(Gdx.input.getX() > customButtonSprite.getX() 
+    && Gdx.input.getX() < customButtonSprite.getX() + customButtonSprite.getWidth() 
+    && Gdx.input.getY() < Gdx.graphics.getHeight() - customButtonSprite.getY() 
+    && Gdx.input.getY() > Gdx.graphics.getHeight() - customButtonSprite.getY() - customButtonSprite.getHeight()) {
+      
+      if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+        game.setScreen(new CustomLevelScreen(game));
+        this.dispose();
+      }
     }
     if(Gdx.input.getX() > startButtonSprite.getX() 
     && Gdx.input.getX() < startButtonSprite.getX() + startButtonSprite.getWidth() 
@@ -86,6 +114,8 @@ public class TitleScreen extends ScreenAdapter {
     else {
       startButtonSprite.draw(game.batch);
     }
+    editorButtonSprite.draw(game.batch);
+    customButtonSprite.draw(game.batch);
     game.font.draw(game.batch, "Title Screen!", Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() - 100);
     game.batch.end();
   }
