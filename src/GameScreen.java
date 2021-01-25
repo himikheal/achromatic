@@ -149,7 +149,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 		  player.getSprite().setPosition((player.getBody().getPosition().x * PIXELS_TO_METERS) - player.getSprite().getWidth()/2, (player.getBody().getPosition().y * PIXELS_TO_METERS) - player.getSprite().getHeight()/2);
 		  player.getSprite().setRotation((float)Math.toDegrees(player.getBody().getAngle()));
 
-		  Gdx.gl.glClearColor(1, 1, 1, 1);
+		  Gdx.gl.glClearColor(0, 0, 0, 1);
 		  Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		  batch.setProjectionMatrix(camera.combined);
@@ -433,14 +433,14 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         lvlW = Integer.parseInt(reader.readLine());
         System.out.println(lvlH + "\n" + lvlW);
         level = new String[lvlH][lvlW];
-        for(int i = 0; i < lvlH; i++){
+        for(int i = 0; i < lvlH; i++) {
           String st = reader.readLine();
-          for(int j = 0; j < lvlW; j++){
+          for(int j = 0; j < lvlW; j++) {
             level[i][j] = st.substring(0, st.indexOf(" "));
             System.out.print(level[i][j]);
-            try{
+            try {
               st = st.substring(st.indexOf(" ") + 1, st.length());
-            }catch(Exception e){
+            }catch(Exception e) {
               st = null;
             }
           }
@@ -448,12 +448,12 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         
         levelMap = new Tile[lvlH][lvlW];
   
-        for(int i = 0; i < lvlH; i++){
+        for(int i = 0; i < lvlH; i++) {
           System.out.println("");
-          for(int j = 0; j < lvlW; j++){
+          for(int j = 0; j < lvlW; j++) {
             String[] tileData = new String[4];
             String st = level[i][j];
-            for(int k = 0; k < 4; k++){
+            for(int k = 0; k < 4; k++) {
               tileData[k] = st.substring(k, k+1);
             }
             System.out.print(tileData[0]);

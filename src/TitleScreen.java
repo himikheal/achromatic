@@ -23,6 +23,7 @@ public class TitleScreen extends ScreenAdapter {
 
   @Override
   public void show() {
+    
     startButtonSprite.setSize(256, 101);
     startButtonDownSprite.setSize(256, 101);
     startButtonClickedSprite.setSize(256, 101);
