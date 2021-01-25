@@ -62,6 +62,7 @@ public class LevelScreen extends ScreenAdapter {
 
   @Override
   public void render(float delta) {
+    System.out.println("hhhhhhh");
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -72,6 +73,7 @@ public class LevelScreen extends ScreenAdapter {
     && Gdx.input.getY() < levelOneSprite.getY()) {
       if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
         game.setScreen(new GameScreen(game, "level_1.txt"));
+        this.dispose();
       }
       else {
         levelOneDownSprite.draw(game.batch);

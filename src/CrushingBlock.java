@@ -27,11 +27,13 @@ class CrushingBlock extends Block implements CrusherAI {
   CrushingBlock(Point point, Sprite sprite, Body body, int speed, World gameWorld) {
     super(point, sprite, body, speed);
     this.gameWorld = gameWorld;
-    initial = new Vector2(body.getPosition());
-    float x = body.getPosition().x;
-    float y = body.getPosition().y;
-    p1 = new Vector2(x, y);
-    p2 = new Vector2(x, y - 100);
+    if(body != null){
+      initial = new Vector2(body.getPosition());
+      float x = body.getPosition().x;
+      float y = body.getPosition().y;
+      p1 = new Vector2(x, y);
+      p2 = new Vector2(x, y - 100);
+    }
     callback = new CrusherRayCastCallback();
   }
 

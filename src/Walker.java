@@ -4,23 +4,49 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.physics.box2d.Body;
 
 class Walker extends Enemy implements WalkerAI {
-  private Point[] points = new Point[2];
+private int[] patrol;
+private float initX;
+boolean direction = true;
 
-  Walker(Point point, Sprite sprite, Body body, int speed) {
-    super(point, sprite, body, speed);
-  }
-
-  Walker(Point p1, Point p2, Sprite sprite, Body body, int speed) {
-    super(p1, sprite, body, speed);
-    this.points[0] = p1;
-    this.points[1] = p2;
+  Walker(Point point, Sprite sprite, Body body, int[] patrol) {
+    super(point, sprite, body, 1);
+    this.patrol = patrol;
   }
 
   public void move() {
-
+    if(direction){
+      if(this.getBody().getPosition().x < initX + patrol[1]){
+        this.getBody().setLinearVelocity(1, 0);
+      }else{
+        direction = false;
+      }
+    }else{
+      if(this.getBody().getPosition().x > initX - patrol[0]){
+        this.getBody().setLinearVelocity(-1, 0);
+      }else{
+        direction = true;
+      }
+    }
   }
 
-  public void move(Point p1, Point p2) {
-
+  public void setInit(){
+    initX = this.getBody().getPosition().x;
   }
+
+  public int[] getPatrol(){
+    return this.patrol;
+  }
+
+  public void setPatrol(int[] patrol){
+    this.patrol = patrol;
+  }
+
+  public boolean getDirection(){
+    return this.direction;
+  }
+
+  public void setDirection(boolean direction){
+    this.direction = direction;
+  }
+
 }

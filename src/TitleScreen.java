@@ -74,6 +74,7 @@ public class TitleScreen extends ScreenAdapter {
       if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
         startButtonClickedSprite.draw(game.batch);
         game.setScreen(new LevelScreen(game));
+        this.dispose();
       }
       else {
         startButtonDownSprite.draw(game.batch);

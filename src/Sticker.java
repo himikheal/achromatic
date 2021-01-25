@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 
 class Sticker extends Enemy implements StickerAI {
   private int orientation;
-  private boolean forward = true, below, beneath, updated;
+  private boolean forward = true, below, beneath;
   private boolean clockwise = true;
   private int bodyX, bodyY, tempX, tempY;
   private Point index, front, down, under;
@@ -14,17 +14,20 @@ class Sticker extends Enemy implements StickerAI {
   Sticker(Point point, Sprite sprite, Body body, int speed, int orientation) {
     super(point, sprite, body, speed);
     this.orientation = orientation;
-    index = new Point(this.getPoint().y, this.getPoint().x);
-    front = new Point(this.getPoint().y, this.getPoint().x);
-    down = new Point(this.getPoint().y, this.getPoint().x);
-    under = new Point(this.getPoint().y, this.getPoint().x);
-    updateIndeces();
-
-    bodyX = Math.round(body.getPosition().x);
-    bodyY = Math.round(body.getPosition().y);
-    tempX = Math.round(bodyX + (front.x - index.x));
-    tempY = Math.round(bodyY + (front.y - index.y));
-    body.setTransform(bodyX, bodyY - 0.45f, 0f);
+    if(point != null){
+      index = new Point(this.getPoint().y, this.getPoint().x);
+      front = new Point(this.getPoint().y, this.getPoint().x);
+      down = new Point(this.getPoint().y, this.getPoint().x);
+      under = new Point(this.getPoint().y, this.getPoint().x);
+      updateIndeces();  
+    }
+    if(body != null){
+      bodyX = Math.round(body.getPosition().x);
+      bodyY = Math.round(body.getPosition().y);
+      tempX = Math.round(bodyX + (front.x - index.x));
+      tempY = Math.round(bodyY + (front.y - index.y));
+      body.setTransform(bodyX, bodyY - 0.45f, 0f);
+    }
   }
 
   public void move(Tile[][] levelMap) {
@@ -36,15 +39,16 @@ class Sticker extends Enemy implements StickerAI {
         tiles[0] = levelMap[index.y + (front.y - index.y)][index.x + (front.x - index.x)];
         tiles[1] = levelMap[index.y + (down.y - index.y)][index.x + (down.x - index.x)];
         tiles[2] = levelMap[index.y + (under.y - index.y)][index.x + (under.x - index.x)];
-        forward = (tiles[0] != null && !(tiles[0] instanceof Sticker)  && !(tiles[0] instanceof Air));
-        below = (tiles[1] != null && !(tiles[1] instanceof Sticker)  && !(tiles[1] instanceof Air));
-        beneath = (tiles[2] != null && !(tiles[2] instanceof Sticker)  && !(tiles[2] instanceof Air));
+        forward = (tiles[0] != null && !(tiles[0] instanceof Moving)  && !(tiles[0] instanceof Air));
+        below = (tiles[1] != null && !(tiles[1] instanceof Moving)  && !(tiles[1] instanceof Air));
+        beneath = (tiles[2] != null && !(tiles[2] instanceof Moving)  && !(tiles[2] instanceof Air));
       }catch(IndexOutOfBoundsException e){
         if(this.orientation == 3){
           this.orientation = 0;
         }else{
           this.orientation++;
         }
+        updateIndeces();
       }
       
       
@@ -56,7 +60,6 @@ class Sticker extends Enemy implements StickerAI {
         }else{
           this.orientation++;
         }
-        System.out.println("orientation changed: " + this.orientation);
         updateIndeces();
         tempX = Math.round(bodyX + (front.x - index.x));
         tempY = Math.round(bodyY + (index.y - front.y)); 
@@ -66,7 +69,6 @@ class Sticker extends Enemy implements StickerAI {
         }else{
           this.orientation--;
         }
-        System.out.println("orientation changed: " + this.orientation);
         updateIndeces();
         tempX = Math.round(bodyX + (front.x - index.x));
         tempY = Math.round(bodyY + (index.y - front.y)); 
@@ -80,16 +82,12 @@ class Sticker extends Enemy implements StickerAI {
 
 
       if(bodyX == tempX && bodyY == tempY){
-        updated = true;
         
         index.x = index.x + (front.x - index.x);
         index.y = index.y + (front.y - index.y);
         updateIndeces();
-        System.out.println("update");
         tempX = Math.round(bodyX + (front.x - index.x));
         tempY = Math.round(bodyY + (index.y - front.y));
-      }else{
-        updated = false;
       }
     }
   }

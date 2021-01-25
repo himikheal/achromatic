@@ -7,25 +7,26 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.physics.box2d.Body;
 
 class MovingBlock extends Moving implements FloaterAI {
-  private Vector2[] points;
+  private int[] points;
+  private float initX, initY;
   private boolean direction; //true for right/up, false for left/down
   private boolean axis; //true for horizontal, false for vertical
 
-  MovingBlock(Point point, Sprite sprite, Body body, Vector2[] points) {
+  MovingBlock(Point point, Sprite sprite, Body body, int[] points) {
     super(point, sprite, body, 1);
     this.points = points;
   }
   
-  public void move(Vector2[] points) {
+  public void move(int[] points) {
     if(axis){
       if(direction){
-        if(this.getBody().getPosition().x < points[1].x){
+        if(this.getBody().getPosition().x < initX + points[1]){
           this.getBody().setLinearVelocity(2, 0);
         }else{
           direction = false;
         }
       }else{
-        if(this.getBody().getPosition().x > points[0].x){
+        if(this.getBody().getPosition().x > initX - points[0]){
           this.getBody().setLinearVelocity(-2, 0);
         }else{
           direction = true;
@@ -33,13 +34,13 @@ class MovingBlock extends Moving implements FloaterAI {
       }
     }else{
       if(direction){
-        if(this.getBody().getPosition().y < points[1].y){
+        if(this.getBody().getPosition().y < initY + points[1]){
           this.getBody().setLinearVelocity(0, 2);
         }else{
           direction = false;
         }
       }else{
-        if(this.getBody().getPosition().y > points[0].y){
+        if(this.getBody().getPosition().y > initY - points[0]){
           this.getBody().setLinearVelocity(0, -2);
         }else{
           direction = true;
@@ -48,11 +49,16 @@ class MovingBlock extends Moving implements FloaterAI {
     }
   }
 
-  public Vector2[] getPoints(){
+  public void setInit(){
+    initX = this.getBody().getPosition().x;
+    initY = this.getBody().getPosition().y;
+  }
+
+  public int[] getPoints(){
     return this.points;
   }
 
-  public void setPoints(Vector2[] points){
+  public void setPoints(int[] points){
     this.points = points;
   }
 
