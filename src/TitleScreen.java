@@ -32,13 +32,13 @@ public class TitleScreen extends ScreenAdapter {
     startButtonSprite.setSize(256, 101);
     startButtonDownSprite.setSize(256, 101);
     startButtonClickedSprite.setSize(256, 101);
-    editorButtonSprite.setSize(256, 101);
-    customButtonSprite.setSize(256, 101);
+    editorButtonSprite.setSize(246, 78);
+    customButtonSprite.setSize(246, 78);
     startButtonSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - startButtonSprite.getHeight()/2);
     startButtonDownSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonDownSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - startButtonDownSprite.getHeight()/2);
     startButtonClickedSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonClickedSprite.getWidth()/2, Gdx.graphics.getHeight()/2 - startButtonClickedSprite.getHeight()/2);
-    editorButtonSprite.setPosition(Gdx.graphics.getWidth()/2 - startButtonSprite.getWidth(), Gdx.graphics.getHeight()/2 - startButtonSprite.getHeight()*2);
-    customButtonSprite.setPosition(Gdx.graphics.getWidth()/2 , Gdx.graphics.getHeight()/2 - startButtonSprite.getHeight()*2);
+    editorButtonSprite.setPosition(Gdx.graphics.getWidth()/2 - editorButtonSprite.getWidth(), Gdx.graphics.getHeight()/2 - editorButtonSprite.getHeight()*2);
+    customButtonSprite.setPosition(Gdx.graphics.getWidth()/2 , Gdx.graphics.getHeight()/2 - customButtonSprite.getHeight()*2);
 
     //Gdx.input.setInputProcessor(new InputAdapter() {
     //  @Override
