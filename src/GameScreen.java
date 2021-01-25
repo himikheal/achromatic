@@ -57,6 +57,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     boolean jumping = false;
     boolean dead = false;
     boolean nextLevel = false;
+    boolean escape = false;
 	  int lvlH;
     int lvlW;
     //int lvlNum;
@@ -118,6 +119,23 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         gameWorld.dispose();
         gameWorld = null;
         game.setScreen(new LevelScreen(game));
+        nextLevel = false;
+        return;
+      }
+      if(escape){
+        gameWorld.destroyBody(player.getBody());
+        player.setBody(null);
+        for(int i = 0; i < levelMap.length; i++){
+          for(int j = 0; j < levelMap[0].length; j++){
+            if(levelMap[i][j] != null){
+              gameWorld.destroyBody(levelMap[i][j].getBody());
+              levelMap[i][j].setBody(null);
+            }
+          }
+        }
+        gameWorld.dispose();
+        gameWorld = null;
+        game.setScreen(new EditorScreen(game, new File("assets/levels/" + levelName)));
         nextLevel = false;
         return;
       }
@@ -183,7 +201,10 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 		  		player.getBody().applyLinearImpulse( 0, 18f, pos.x, pos.y, true);
 		  		this.jumping = true;
 		  	}
-		  }
+      }
+      if(Gdx.input.isKeyPressed(Keys.ESCAPE)){
+        escape = true;
+      }
       
     }
 

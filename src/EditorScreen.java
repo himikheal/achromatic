@@ -1,5 +1,10 @@
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.IOException;
+
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -186,7 +191,7 @@ public class EditorScreen extends ScreenAdapter {
   boolean goalPlaced = false;
   boolean configured = false;
   boolean moving = false;
-  int forwards, backwards;
+  int forwards, backwards, lvlW, lvlH;
 
   String[] tileChars = new String[] {"@", "^", "#", "V", "X", "=", "D"};
   Tile[] tileTypes = new Tile[] {new PushableBlock(null, null, null, 0)
@@ -199,6 +204,11 @@ public class EditorScreen extends ScreenAdapter {
 
   EditorScreen(ColourGame game) {
     this.game = game;
+  }
+
+  EditorScreen(ColourGame game, File file) {
+    this.game = game;
+    loadMap(file);
   }
 
   @Override
@@ -677,9 +687,6 @@ public class EditorScreen extends ScreenAdapter {
                         solid = 1;
                       }
                     }
-                    //if(((Solid)map[j][i]).getColour() == 0) {
-                    //  solid = 1;
-                    //}
                     if(map[j][i] instanceof CrushingBlock) {
                       writer.print(tileChars[k] + solid + "3" + ((Solid)map[j][i]).getColour());
                     }if(map[j][i] instanceof BrokenBlock) {
@@ -771,6 +778,230 @@ public class EditorScreen extends ScreenAdapter {
     //sevenDownSprite.setPosition(x, y);
     //eightDownSprite.setPosition(x, y);
     //nineDownSprite.setPosition(x, y);
+  }
+
+  //public void loadMap(File file){
+  //  BufferedReader reader;
+  //  for(int i = 0; i < 50; i++){
+  //    for(int j = 0; j < 50; j++){
+  //      map[i][j] = null;
+  //    }
+  //  }
+
+  //  for(int i = 0; i < )
+  //}
+
+  public void loadMap(File file){
+    BufferedReader reader;
+    String[][] level;
+    Tile[][] levelMap;
+    try{
+      reader = new BufferedReader(new FileReader(file));
+      lvlH = Integer.parseInt(reader.readLine());
+      lvlW = Integer.parseInt(reader.readLine());
+      System.out.println(lvlH + "\n" + lvlW);
+      level = new String[lvlH][lvlW];
+      for(int i = 0; i < lvlH; i++){
+        String st = reader.readLine();
+        for(int j = 0; j < lvlW; j++){
+          level[i][j] = st.substring(0, st.indexOf(" "));
+          //System.out.print(level[i][j]);
+          try{
+            st = st.substring(st.indexOf(" ") + 1, st.length());
+          }catch(Exception e){
+            st = null;
+          }
+        }
+      }
+      
+      levelMap = new Tile[lvlH][lvlW];
+
+      for(int i = 0; i < lvlH; i++){
+        System.out.println("");
+        for(int j = 0; j < lvlW; j++){
+          String[] tileData = new String[4];
+          String st = level[i][j];
+          for(int k = 0; k < 4; k++){
+            tileData[k] = st.substring(k, k+1);
+          }
+          System.out.print(tileData[0]);
+
+          if(tileData[0].equals("#")){
+            Texture tex = new Texture("assets/sprites/tileSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Solid(null, sprite, null);
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Solid)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("$")){
+            Texture tex = new Texture("assets/sprites/spawnSprite_2.png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Spawn(null, sprite, null);
+          }
+          if(tileData[0].equals("G")){
+            Texture tex = new Texture("assets/sprites/giverSprite_" + tileData[3] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new ColourGiver(null, sprite, null, Integer.parseInt(tileData[1]));
+          }
+          if(tileData[0].equals("R")){
+            Texture tex = new Texture("assets/sprites/removerSprite.png");
+            Sprite sprite = new Sprite(tex);
+            map[j][i] = new ColourRemover(null, sprite, null);
+          }
+          if(tileData[0].equals("^")){
+            Texture tex = new Texture("assets/sprites/spikeSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Spikes(null, sprite, null);
+
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Spikes)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("*")){
+            Texture tex = new Texture("assets/sprites/checkSprite_1.png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Checkpoint(null, sprite, null);
+          }
+          if(tileData[0].equals("@")){
+            Texture tex = new Texture("assets/sprites/boxSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new PushableBlock(null, sprite, null, Integer.parseInt(tileData[2]));
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((PushableBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("X")){
+            Texture tex = new Texture("assets/sprites/breakSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+            
+            map[j][i] = new BrokenBlock(null, sprite, null, Integer.parseInt(tileData[2]));
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((BrokenBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("V")){
+            Texture tex = new Texture("assets/sprites/crushSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+            
+            map[j][i] = new CrushingBlock(null, sprite, null, Integer.parseInt(tileData[2]), null);
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((CrushingBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("-")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/moveSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/moveSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            map[j][i] = new MovingBlock(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((MovingBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("|")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/moveSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/moveSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            map[j][i] = new MovingBlock(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((MovingBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("&")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/stickSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/stickSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Sticker(null, sprite, null, Integer.parseInt(tileData[1]), Integer.parseInt(tileData[2]));
+            
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Sticker)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("f")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/floatSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/floatSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+            
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            levelMap[j][i] = new Floater(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Floater)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("=")){
+            Texture tex = new Texture("assets/sprites/iceSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new SlipperyBlock(null, sprite, null);
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((SlipperyBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("w")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/walkSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/walkSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+            
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            levelMap[j][i] = new Walker(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Walker)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("D")){
+            Texture tex = new Texture("assets/sprites/doorSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Goal(null, sprite, null, Integer.parseInt(tileData[3]));
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Goal)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+        }
+      }
+      
+    }catch(IOException e){
+      System.out.println("File not found");
+      e.printStackTrace();
+    }
   }
 
   @Override
