@@ -67,6 +67,9 @@ public class TitleScreen extends ScreenAdapter {
     if(Gdx.input.isKeyJustPressed(Keys.Z)) {
       game.setScreen(new EditorScreen(game));
     }
+    if(Gdx.input.isKeyJustPressed(Keys.X)) {
+      game.setScreen(new CustomLevelScreen(game));
+    }
     if(Gdx.input.getX() > startButtonSprite.getX() 
     && Gdx.input.getX() < startButtonSprite.getX() + startButtonSprite.getWidth() 
     && Gdx.input.getY() < startButtonSprite.getY() + startButtonSprite.getHeight() 

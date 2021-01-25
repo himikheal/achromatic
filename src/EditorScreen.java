@@ -1,5 +1,14 @@
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
+import java.net.Socket;
+import java.nio.file.Files;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -130,6 +139,7 @@ public class EditorScreen extends ScreenAdapter {
 
 
   Texture playButton = new Texture("assets/sprites/playButton.png");
+  Texture uploadButton = new Texture("assets/sprites/uploadButton.png");
   Sprite boxSprite = new Sprite(box);
   Sprite checkpointSprite = new Sprite(checkpoint);
   Sprite giverSprite = new Sprite(giver);
@@ -169,6 +179,7 @@ public class EditorScreen extends ScreenAdapter {
   //Sprite eightDownSprite = new Sprite(eightDown);
   //Sprite nineDownSprite = new Sprite(nineDown);
 
+  Sprite uploadButtonSprite = new Sprite(uploadButton);
   int colour = 0;
   Texture[] boxTextures = new Texture[7];
   Texture[] giverTextures = new Texture[7];
@@ -186,7 +197,7 @@ public class EditorScreen extends ScreenAdapter {
   boolean goalPlaced = false;
   boolean configured = false;
   boolean moving = false;
-  int forwards, backwards;
+  int forwards, backwards, lvlW, lvlH;
 
   String[] tileChars = new String[] {"@", "^", "#", "V", "X", "=", "D"};
   Tile[] tileTypes = new Tile[] {new PushableBlock(null, null, null, 0)
@@ -196,9 +207,17 @@ public class EditorScreen extends ScreenAdapter {
                                , new BrokenBlock(null, null, null, 2)
                                , new SlipperyBlock(null, null, null)
                                , new Goal(null, null, null, 0)};
+  private Socket socket;
+  private ObjectInputStream input;
+  private ObjectOutputStream output;
 
   EditorScreen(ColourGame game) {
     this.game = game;
+  }
+
+  EditorScreen(ColourGame game, File file) {
+    this.game = game;
+    loadMap(file);
   }
 
   @Override
@@ -224,6 +243,8 @@ public class EditorScreen extends ScreenAdapter {
     goalSprite.setPosition(16, Gdx.graphics.getHeight() - 240);
     playButtonSprite.setSize(174, 78);
     playButtonSprite.setPosition(10, 10);
+    uploadButtonSprite.setSize(246,78);
+    uploadButtonSprite.setPosition(200, 10);
     boxTextures[0] = box;
     boxTextures[1] = boxR;
     boxTextures[2] = boxO;
@@ -481,7 +502,8 @@ public class EditorScreen extends ScreenAdapter {
           ((Walker)selected).setColour(this.colour);
           moving = true;
         }
-      }else if(Gdx.input.getY() > 176 && Gdx.input.getY() < 240) {
+      }
+      else if(Gdx.input.getY() > 176 && Gdx.input.getY() < 240) {
         configured = false;
         if(Gdx.input.getX() > 16
         && Gdx.input.getX() < 80) {
@@ -496,7 +518,8 @@ public class EditorScreen extends ScreenAdapter {
           System.out.println("CLEAR");
           moving = false;
         }
-      }else if(Gdx.input.getY() > 432 && Gdx.input.getY() < 480 && moving) {
+      }
+      else if(Gdx.input.getY() > 432 && Gdx.input.getY() < 480 && moving) {
         if(Gdx.input.getX() > 16
         && Gdx.input.getX() < 64) {
           forwards = 0;
@@ -528,35 +551,45 @@ public class EditorScreen extends ScreenAdapter {
         && Gdx.input.getX() < 496) {
           forwards = 9;
         }
-      }else if(Gdx.input.getY() > 512 && Gdx.input.getY() < 560 && moving) {
+      }
+      else if(Gdx.input.getY() > 512 && Gdx.input.getY() < 560 && moving) {
         if(Gdx.input.getX() > 16
         && Gdx.input.getX() < 64) {
           backwards = 0;
-        }else if(Gdx.input.getX() > (64)
+        }
+        else if(Gdx.input.getX() > (64)
         && Gdx.input.getX() < 112) {
           backwards = 1;
-        }else if(Gdx.input.getX() > (112)
+        }
+        else if(Gdx.input.getX() > (112)
         && Gdx.input.getX() < 160) {
           backwards = 2;
-        }else if(Gdx.input.getX() > (160)
+        }
+        else if(Gdx.input.getX() > (160)
         && Gdx.input.getX() < 208) {
           backwards = 3;
-        }else if(Gdx.input.getX() > (208)
+        }
+        else if(Gdx.input.getX() > (208)
         && Gdx.input.getX() < 256) {
           backwards = 4;
-        }else if(Gdx.input.getX() > (256)
+        }
+        else if(Gdx.input.getX() > (256)
         && Gdx.input.getX() < 304) {
           backwards = 5;
-        }else if(Gdx.input.getX() > (304)
+        }
+        else if(Gdx.input.getX() > (304)
         && Gdx.input.getX() < 352) {
           backwards = 6;
-        }else if(Gdx.input.getX() > (352)
+        }
+        else if(Gdx.input.getX() > (352)
         && Gdx.input.getX() < 400) {
           backwards = 7;
-        }else if(Gdx.input.getX() > (400)
+        }
+        else if(Gdx.input.getX() > (400)
         && Gdx.input.getX() < 448) {
           backwards = 8;
-        }else if(Gdx.input.getX() > (448)
+        }
+        else if(Gdx.input.getX() > (448)
         && Gdx.input.getX() < 496) {
           backwards = 9;
         }
@@ -573,7 +606,6 @@ public class EditorScreen extends ScreenAdapter {
             configured = true;
           }
         }
-
       }
       if(Gdx.input.getX() > 600 && Gdx.input.getX() < 630) {
         if(Gdx.input.getY() > Gdx.graphics.getHeight() - 744 - 50
@@ -624,85 +656,200 @@ public class EditorScreen extends ScreenAdapter {
         walkSprite.setTexture(walkTextures[colour]);
         goalSprite.setTexture(goalTextures[colour]);
       }
-      if(Gdx.input.getX() > 10    //HEIGHT 78
-      && Gdx.input.getX() < 184
-      && Gdx.input.getY() < Gdx.graphics.getHeight() - 10
+
+
+      //else if(Gdx.input.getX() > 200
+      //&& Gdx.input.getX() < 446) {
+      //  System.out.println("UPLOAD");
+      //  try {
+      //    PrintWriter writer = new PrintWriter("assets/levels/uploadMap.txt", "UTF-8");
+
+      if(Gdx.input.getY() < Gdx.graphics.getHeight() - 10
       && Gdx.input.getY() > Gdx.graphics.getHeight() - 88
       && spawnPlaced 
       && goalPlaced) {
-        System.out.println("PLAYED");
-        try {
-          PrintWriter writer = new PrintWriter("assets/levels/tempMap.txt");
-          writer.println("50");
-          writer.println("50");
-          for(int i = 0; i < map.length; i++) {
-            for(int j = 0; j < map.length; j++) {
-              if(map[j][i] instanceof Spawn) {
-                writer.print("$000");
-              }
-              else if(map[j][i] instanceof Checkpoint) {
-                writer.print("*000");
-              }
-              else if(map[j][i] instanceof ColourRemover) {
-                writer.print("R000");
-              }
-              else if(map[j][i] instanceof ColourGiver) {
-                writer.print("G" + ((ColourGiver)map[j][i]).getColour() + "0" + ((ColourGiver)map[j][i]).getColour());
-              }
-              else if(map[j][i] instanceof Sticker) {
-                writer.print("&10" + ((Sticker)map[j][i]).getColour());
-              }
-              else if(map[j][i] instanceof MovingBlock) {
-                writer.print("-" + ((MovingBlock)map[j][i]).getPoints()[0] + ((MovingBlock)map[j][i]).getPoints()[1] + ((MovingBlock)map[j][i]).getColour());
-              }
-              else if(map[j][i] instanceof Floater) {
-                writer.print("f" + ((Floater)map[j][i]).getPoints()[0] + ((Floater)map[j][i]).getPoints()[1] + ((Floater)map[j][i]).getColour());
-              }
-              else if(map[j][i] instanceof Walker) {
-                writer.print("w" + ((Walker)map[j][i]).getPatrol()[0] + ((Walker)map[j][i]).getPatrol()[1] + ((Walker)map[j][i]).getColour());
-              }
-              else if(map[j][i] == null) {
-                writer.print("~100");
-              }
-              else {
-                for(int k = 0; k < tileTypes.length; k++) {
-                  if(map[j][i].getClass() == tileTypes[k].getClass()) {
-                    int solid = 2;
-                    if(map[j][i] instanceof Solid) {
-                      if(((Solid)map[j][i]).getColour() == 0) {
-                        solid = 1;
+        if(Gdx.input.getX() > 10    //HEIGHT 78
+        && Gdx.input.getX() < 184){
+          System.out.println("PLAYED");
+          try {
+            PrintWriter writer = new PrintWriter("assets/levels/tempMap.txt", "UTF-8");
+            writer.println("50");
+            writer.println("50");
+            for(int i = 0; i < map.length; i++) {
+              for(int j = 0; j < map.length; j++) {
+                if(map[j][i] instanceof Spawn) {
+                  writer.print("$000");
+                }
+                else if(map[j][i] instanceof Checkpoint) {
+                  writer.print("*000");
+                }
+                else if(map[j][i] instanceof ColourRemover) {
+                  writer.print("R000");
+                }
+                else if(map[j][i] instanceof ColourGiver) {
+                  writer.print("G" + ((ColourGiver)map[j][i]).getColour() + "0" + ((ColourGiver)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof Sticker) {
+                  writer.print("&10" + ((Sticker)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof MovingBlock) {
+                  writer.print("-" + ((MovingBlock)map[j][i]).getPoints()[0] + ((MovingBlock)map[j][i]).getPoints()[1] + ((MovingBlock)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof Floater) {
+                  writer.print("f" + ((Floater)map[j][i]).getPoints()[0] + ((Floater)map[j][i]).getPoints()[1] + ((Floater)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof Walker) {
+                  writer.print("w" + ((Walker)map[j][i]).getPatrol()[0] + ((Walker)map[j][i]).getPatrol()[1] + ((Walker)map[j][i]).getColour());
+                }
+                else if(map[j][i] == null) {
+                  writer.print("~100");
+                }
+                else {
+                  for(int k = 0; k < tileTypes.length; k++) {
+                    if(map[j][i].getClass() == tileTypes[k].getClass()) {
+                      int solid = 2;
+                      if(map[j][i] instanceof Solid) {
+                        if(((Solid)map[j][i]).getColour() == 0) {
+                          solid = 1;
+                        }
                       }
-                    }else if(map[j][i] instanceof Goal) {
-                      if(((Goal)map[j][i]).getColour() == 0) {
-                        solid = 1;
+                      else if(map[j][i] instanceof Goal) {
+                        if(((Goal)map[j][i]).getColour() == 0) {
+                          solid = 1;
+                        }
                       }
-                    }
-                    //if(((Solid)map[j][i]).getColour() == 0) {
-                    //  solid = 1;
-                    //}
-                    if(map[j][i] instanceof CrushingBlock) {
-                      writer.print(tileChars[k] + solid + "3" + ((Solid)map[j][i]).getColour());
-                    }if(map[j][i] instanceof BrokenBlock) {
-                      writer.print(tileChars[k] + solid + "2" + ((Solid)map[j][i]).getColour());
-                    }if(map[j][i] instanceof Goal) {
-                      writer.print(tileChars[k] + solid + "2" + ((Goal)map[j][i]).getColour());
-                    }else{
-                      writer.print(tileChars[k] + solid + "0" + ((Solid)map[j][i]).getColour());
+                      //if(((Solid)map[j][i]).getColour() == 0) {
+                      //  solid = 1;
+                      //}
+                      if(map[j][i] instanceof CrushingBlock) {
+                        writer.print(tileChars[k] + solid + "3" + ((Solid)map[j][i]).getColour());
+                      }
+                      if(map[j][i] instanceof BrokenBlock) {
+                        writer.print(tileChars[k] + solid + "2" + ((Solid)map[j][i]).getColour());
+                      }
+                      if(map[j][i] instanceof Goal) {
+                        writer.print(tileChars[k] + solid + "2" + ((Goal)map[j][i]).getColour());
+                      }
+                      else {
+                        writer.print(tileChars[k] + solid + "0" + ((Solid)map[j][i]).getColour());
+                      }
                     }
                   }
                 }
+                writer.print(" ");
               }
-              writer.print(" ");
+              writer.println("");
             }
-            writer.println("");
+            writer.close();
+            game.setScreen(new GameScreen(game, "tempMap.txt"));
+          } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+          } catch (UnsupportedEncodingException e2) {
+            System.out.println("Unsupported encoding");
           }
-          writer.close();
-          game.setScreen(new GameScreen(game, "tempMap.txt"));
-        } catch (FileNotFoundException e) {
-          System.out.println("File not found");
+        }
+        else if(Gdx.input.getX() > 200
+             && Gdx.input.getX() < 446) {
+          System.out.println("UPLOAD");
+          try {
+            PrintWriter writer = new PrintWriter("assets/levels/uploadMap.txt", "UTF-8");
+            writer.println("50");
+            writer.println("50");
+            for(int i = 0; i < map.length; i++) {
+              for(int j = 0; j < map.length; j++) {
+                if(map[j][i] instanceof Spawn) {
+                  writer.print("$000");
+                }
+                else if(map[j][i] instanceof Checkpoint) {
+                  writer.print("*000");
+                }
+                else if(map[j][i] instanceof ColourRemover) {
+                  writer.print("R000");
+                }
+                else if(map[j][i] instanceof ColourGiver) {
+                  writer.print("G" + ((ColourGiver)map[j][i]).getColour() + "0" + ((ColourGiver)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof Sticker) {
+                  writer.print("&10" + ((Sticker)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof MovingBlock) {
+                  writer.print("-" + ((MovingBlock)map[j][i]).getPoints()[0] + ((MovingBlock)map[j][i]).getPoints()[1] + ((MovingBlock)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof Floater) {
+                  writer.print("f" + ((Floater)map[j][i]).getPoints()[0] + ((Floater)map[j][i]).getPoints()[1] + ((Floater)map[j][i]).getColour());
+                }
+                else if(map[j][i] instanceof Walker) {
+                  writer.print("w" + ((Walker)map[j][i]).getPatrol()[0] + ((Walker)map[j][i]).getPatrol()[1] + ((Walker)map[j][i]).getColour());
+                }
+                else if(map[j][i] == null) {
+                  writer.print("~100");
+                }
+                else {
+                  for(int k = 0; k < tileTypes.length; k++) {
+                    if(map[j][i].getClass() == tileTypes[k].getClass()) {
+                      int solid = 2;
+                      if(map[j][i] instanceof Solid) {
+                        if(((Solid)map[j][i]).getColour() == 0) {
+                          solid = 1;
+                        }
+                      }
+                      else if(map[j][i] instanceof Goal) {
+                        if(((Goal)map[j][i]).getColour() == 0) {
+                          solid = 1;
+                        }
+                      }
+                      //if(((Solid)map[j][i]).getColour() == 0) {
+                      //  solid = 1;
+                      //}
+                      if(map[j][i] instanceof CrushingBlock) {
+                        writer.print(tileChars[k] + solid + "3" + ((Solid)map[j][i]).getColour());
+                      }
+                      if(map[j][i] instanceof BrokenBlock) {
+                        writer.print(tileChars[k] + solid + "2" + ((Solid)map[j][i]).getColour());
+                      }
+                      if(map[j][i] instanceof Goal) {
+                        writer.print(tileChars[k] + solid + "2" + ((Goal)map[j][i]).getColour());
+                      }
+                      else {
+                        writer.print(tileChars[k] + solid + "0" + ((Solid)map[j][i]).getColour());
+                      }
+                    }
+                  }
+                }
+                writer.print(" ");
+              }
+              writer.println("");
+              }
+            writer.close();
+          } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+          } catch (UnsupportedEncodingException e2) {
+            System.out.println("Unsupported encoding");
+          }
+          connect("127.0.0.1", 5000);
+          try {
+            output.writeObject("/UPLOAD!");
+            File tempFile = new File("assets/levels/uploadMap.txt");
+            
+            System.out.println(tempFile.getAbsolutePath());
+            byte[] fileBytes = Files.readAllBytes(tempFile.toPath());
+            output.writeObject(fileBytes);
+            String o = (String) input.readObject();
+            System.out.println("Your map code is " + o);
+            
+            input.close();
+            output.close();
+            socket.close();
+          } catch(IOException e) {
+            System.out.println("IOException occured");
+            e.printStackTrace();
+          } catch(ClassNotFoundException e2) {
+            System.out.println("Class not found");
+          }
         }
       }
     }
+    
 
     
 
@@ -728,6 +875,7 @@ public class EditorScreen extends ScreenAdapter {
       drawMenu(Gdx.graphics.getHeight() - 480);
       drawMenu(Gdx.graphics.getHeight() - 560);
     }
+    uploadButtonSprite.draw(game.batch);
 
     for(int i = 0; i < map.length; i++) {
       for(int j = 0; j < map.length; j++) {
@@ -773,8 +921,240 @@ public class EditorScreen extends ScreenAdapter {
     //nineDownSprite.setPosition(x, y);
   }
 
+  public void loadMap(File file){
+    BufferedReader reader;
+    String[][] level;
+    Tile[][] levelMap;
+    try{
+      reader = new BufferedReader(new FileReader(file));
+      lvlH = Integer.parseInt(reader.readLine());
+      lvlW = Integer.parseInt(reader.readLine());
+      System.out.println(lvlH + "\n" + lvlW);
+      level = new String[lvlH][lvlW];
+      for(int i = 0; i < lvlH; i++){
+        String st = reader.readLine();
+        for(int j = 0; j < lvlW; j++){
+          level[i][j] = st.substring(0, st.indexOf(" "));
+          //System.out.print(level[i][j]);
+          try{
+            st = st.substring(st.indexOf(" ") + 1, st.length());
+          }catch(Exception e){
+            st = null;
+          }
+        }
+      }
+      
+      levelMap = new Tile[lvlH][lvlW];
+
+      for(int i = 0; i < lvlH; i++){
+        System.out.println("");
+        for(int j = 0; j < lvlW; j++){
+          String[] tileData = new String[4];
+          String st = level[i][j];
+          for(int k = 0; k < 4; k++){
+            tileData[k] = st.substring(k, k+1);
+          }
+          System.out.print(tileData[0]);
+
+          if(tileData[0].equals("#")){
+            Texture tex = new Texture("assets/sprites/tileSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Solid(null, sprite, null);
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Solid)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("$")){
+            Texture tex = new Texture("assets/sprites/spawnSprite_2.png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Spawn(null, sprite, null);
+          }
+          if(tileData[0].equals("G")){
+            Texture tex = new Texture("assets/sprites/giverSprite_" + tileData[3] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new ColourGiver(null, sprite, null, Integer.parseInt(tileData[1]));
+          }
+          if(tileData[0].equals("R")){
+            Texture tex = new Texture("assets/sprites/removerSprite.png");
+            Sprite sprite = new Sprite(tex);
+            map[j][i] = new ColourRemover(null, sprite, null);
+          }
+          if(tileData[0].equals("^")){
+            Texture tex = new Texture("assets/sprites/spikeSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Spikes(null, sprite, null);
+
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Spikes)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("*")){
+            Texture tex = new Texture("assets/sprites/checkSprite_1.png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Checkpoint(null, sprite, null);
+          }
+          if(tileData[0].equals("@")){
+            Texture tex = new Texture("assets/sprites/boxSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new PushableBlock(null, sprite, null, Integer.parseInt(tileData[2]));
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((PushableBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("X")){
+            Texture tex = new Texture("assets/sprites/breakSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+            
+            map[j][i] = new BrokenBlock(null, sprite, null, Integer.parseInt(tileData[2]));
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((BrokenBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("V")){
+            Texture tex = new Texture("assets/sprites/crushSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+            
+            map[j][i] = new CrushingBlock(null, sprite, null, Integer.parseInt(tileData[2]), null);
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((CrushingBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("-")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/moveSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/moveSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            map[j][i] = new MovingBlock(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((MovingBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("|")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/moveSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/moveSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            map[j][i] = new MovingBlock(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((MovingBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("&")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/stickSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/stickSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Sticker(null, sprite, null, Integer.parseInt(tileData[1]), Integer.parseInt(tileData[2]));
+            
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Sticker)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("f")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/floatSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/floatSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+            
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            levelMap[j][i] = new Floater(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Floater)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("=")){
+            Texture tex = new Texture("assets/sprites/iceSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new SlipperyBlock(null, sprite, null);
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((SlipperyBlock)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("w")){
+            Texture tex;
+            if(Integer.parseInt(tileData[3]) != 0){
+              tex = new Texture("assets/sprites/walkSprite" + tileData[3] + "_2.png");
+            }else{
+              tex = new Texture("assets/sprites/walkSprite0_1.png");
+            }
+            Sprite sprite = new Sprite(tex);
+            
+            int p1 = Integer.parseInt(tileData[1]);
+            int p2 = Integer.parseInt(tileData[2]);
+
+            levelMap[j][i] = new Walker(null, sprite, null, new int[]{p1, p2});
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Walker)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+          if(tileData[0].equals("D")){
+            Texture tex = new Texture("assets/sprites/doorSprite" + tileData[3] + "_" + tileData[1] + ".png");
+            Sprite sprite = new Sprite(tex);
+
+            map[j][i] = new Goal(null, sprite, null, Integer.parseInt(tileData[3]));
+            if(Integer.parseInt(tileData[3]) != 0){
+              ((Goal)map[j][i]).setColour(Integer.parseInt(tileData[3]));
+            }
+          }
+        }
+      }
+      
+    }catch(IOException e){
+      System.out.println("File not found");
+      e.printStackTrace();
+    }
+  }
+
   @Override
   public void hide() {
     
   }
+
+  public Socket connect(String ip, int port) {
+    System.out.println("Attempting to make a connection..");
+
+    try {
+
+      socket = new Socket("127.0.0.1", 5000); //attempt socket connection (local address). This will wait until a connection is made
+      output = new ObjectOutputStream(socket.getOutputStream());
+      input = new ObjectInputStream(socket.getInputStream());
+      
+    } catch (IOException e) {  //connection error occured
+      System.out.println("Connection to Server Failed");
+      e.printStackTrace();
+    }
+    
+    System.out.println("Connection made.");
+    return socket;
+  }
+
 }
