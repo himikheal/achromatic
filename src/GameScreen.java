@@ -41,30 +41,29 @@ import androidx.core.view.accessibility.AccessibilityViewCommand.SetSelectionArg
 
 public class GameScreen extends ScreenAdapter implements ContactListener{
 
-    ColourGame game;
-    SpriteBatch batch;
-	  Texture img;
-	  World gameWorld;
-	  Body screenEdge;
-	  Box2DDebugRenderer debug;
-	  Matrix4 matrix;
-	  OrthographicCamera camera;
-	  BitmapFont font;
-	  String[][] level;
-    Tile[][] levelMap;
-    Player player;
-    File levelFile;
-    Texture background = new Texture("assets/sprites/gameBackground.png");
-    Sprite back = new Sprite(new Texture("assets/sprites/back.png"));
-    boolean jumping = false;
-    boolean dead = false;
-    boolean nextLevel = false;
-    boolean escape = false;
-	  int lvlH;
-    int lvlW;
-    //int lvlNum;
-    String levelName;
-    
+    private ColourGame game;
+    private SpriteBatch batch;
+	  private Texture img;
+	  private World gameWorld;
+	  private Body screenEdge;
+	  private Box2DDebugRenderer debug;
+	  private Matrix4 matrix;
+	  private OrthographicCamera camera;
+	  private BitmapFont font;
+	  private String[][] level;
+    private Tile[][] levelMap;
+    private Player player;
+    private File levelFile;
+    private Texture background = new Texture("assets/sprites/gameBackground.png");
+    private Sprite back = new Sprite(new Texture("assets/sprites/back.png"));
+    private boolean jumping = false;
+    private boolean dead = false;
+    private boolean nextLevel = false;
+    private boolean escape = false;
+	  private int lvlH;
+    private int lvlW;
+    private String levelName;
+    private 
     final short PLAYER = 0x0002;
     final short TILE = 0x0004;
     final short BOX = 0x0008;
@@ -72,11 +71,11 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     final short ENEMY = 0x0020;
     final short SENSOR = 0x0040;
 
-	  float torque = 0.0f;
-	  boolean drawSprite = true;
+	  private float torque = 0.0f;
+	  private boolean drawSprite = true;
   
-	  final float PIXELS_TO_METERS = 64f;
-	  final float MAX_VELOCITY = 5f;
+	  private final float PIXELS_TO_METERS = 64f;
+	  private final float MAX_VELOCITY = 5f;
 
     public GameScreen(ColourGame game, String levelName) {
       this.game = game;
