@@ -1055,7 +1055,113 @@ public class EditorScreen extends ScreenAdapter {
 
   @Override
   public void hide() {
-    
+    zero.dispose(); 
+    one.dispose();  
+    two.dispose();  
+    three.dispose();  
+    four.dispose(); 
+    five.dispose(); 
+    six.dispose();  
+    seven.dispose();  
+    eight.dispose();  
+    nine.dispose(); 
+    zeroDown.dispose(); 
+    oneDown.dispose();  
+    twoDown.dispose();  
+    threeDown.dispose();  
+    fourDown.dispose(); 
+    fiveDown.dispose(); 
+    sixDown.dispose();  
+    sevenDown.dispose();  
+    eightDown.dispose();  
+    nineDown.dispose(); 
+    box.dispose();  
+    boxR.dispose(); 
+    boxO.dispose(); 
+    boxY.dispose(); 
+    boxG.dispose(); 
+    boxB.dispose(); 
+    boxP.dispose(); 
+    checkpoint.dispose(); 
+    giver.dispose();  
+    giverR.dispose(); 
+    giverO.dispose(); 
+    giverY.dispose(); 
+    giverG.dispose(); 
+    giverB.dispose(); 
+    giverP.dispose(); 
+    remover.dispose();  
+    spawn.dispose();  
+    spikes.dispose(); 
+    spikesR.dispose();  
+    spikesO.dispose();  
+    spikesY.dispose();  
+    spikesG.dispose();  
+    spikesB.dispose();  
+    spikesP.dispose();  
+    tile.dispose(); 
+    tileR.dispose();  
+    tileO.dispose();  
+    tileY.dispose();  
+    tileG.dispose();  
+    tileB.dispose();  
+    tileP.dispose();  
+    broken.dispose(); 
+    brokenR.dispose();  
+    brokenO.dispose();  
+    brokenY.dispose();  
+    brokenG.dispose();  
+    brokenB.dispose();  
+    brokenP.dispose();  
+    move.dispose(); 
+    moveR.dispose();  
+    moveO.dispose();  
+    moveY.dispose();  
+    moveG.dispose();  
+    moveB.dispose();  
+    moveP.dispose();  
+    ice.dispose();  
+    iceR.dispose(); 
+    iceO.dispose(); 
+    iceY.dispose(); 
+    iceG.dispose(); 
+    iceB.dispose(); 
+    iceP.dispose(); 
+    crusher.dispose();  
+    crusherR.dispose(); 
+    crusherO.dispose(); 
+    crusherY.dispose(); 
+    crusherG.dispose(); 
+    crusherB.dispose(); 
+    crusherP.dispose(); 
+    floater.dispose();  
+    floaterR.dispose(); 
+    floaterO.dispose(); 
+    floaterY.dispose(); 
+    floaterG.dispose(); 
+    floaterB.dispose(); 
+    floaterP.dispose(); 
+    sticker.dispose();  
+    stickerR.dispose(); 
+    stickerO.dispose(); 
+    stickerY.dispose(); 
+    stickerG.dispose(); 
+    stickerB.dispose(); 
+    stickerP.dispose(); 
+    walker.dispose(); 
+    walkerR.dispose();  
+    walkerO.dispose();  
+    walkerY.dispose();  
+    walkerG.dispose();  
+    walkerB.dispose();  
+    walkerP.dispose();  
+    goal.dispose(); 
+    goalR.dispose();  
+    goalO.dispose();  
+    goalY.dispose();  
+    goalG.dispose();  
+    goalB.dispose();  
+    goalP.dispose();  
   }
 
   public Socket connect(String ip, int port) {
@@ -1196,7 +1302,6 @@ public class EditorScreen extends ScreenAdapter {
         writer.println("");
       }
       writer.close();
-      System.out.println("DASDHASKDASLKJDHAKJDASD");
     } catch (FileNotFoundException e) {
       System.out.println("File not found");
     } catch (UnsupportedEncodingException e2) {

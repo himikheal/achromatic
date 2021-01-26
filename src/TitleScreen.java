@@ -131,5 +131,14 @@ public class TitleScreen extends ScreenAdapter {
   @Override
   public void hide() {
     Gdx.input.setInputProcessor(null);
+    startButton.dispose();
+    startButtonDown.dispose();
+    startButtonClicked.dispose();
+    editorButton.dispose();
+    customButton.dispose();
+    editorButtonDown.dispose();
+    customButtonDown.dispose();
+    achromatic.dispose();
+    background.dispose();
   }
 }

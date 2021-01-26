@@ -143,5 +143,15 @@ public class LevelScreen extends ScreenAdapter {
   @Override
   public void hide() {
     Gdx.input.setInputProcessor(null);
+    levelOne.dispose();
+    levelTwo.dispose();
+    levelThree.dispose();
+    levelFour.dispose();
+    levelFive.dispose();
+    levelOneDown.dispose();
+    levelTwoDown.dispose();
+    levelThreeDown.dispose();
+    levelFourDown.dispose();
+    levelFiveDown.dispose();
   }
 }
