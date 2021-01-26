@@ -5,6 +5,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+/**
+ * TitleScreen
+ * the first screen, shows the title and lets you choose between playng, editing a level or playing a custom level
+ */
 public class TitleScreen extends ScreenAdapter {
   private ColourGame game;
   private Texture startButton = new Texture("assets/sprites/startButton.png");
@@ -26,10 +30,19 @@ public class TitleScreen extends ScreenAdapter {
   private Sprite achromaticSprite = new Sprite(achromatic);
 
 
+  /**
+   * TitleScreen
+   * constructor
+   * @param game game value passed in reference
+   */
   public TitleScreen(ColourGame game) {
     this.game = game;
   }
 
+  /**
+   * show
+   * called on creation, sets variable values and sprite positions
+   */
   @Override
   public void show() {
     startButtonSprite.setSize(256, 101);
@@ -50,6 +63,10 @@ public class TitleScreen extends ScreenAdapter {
     achromaticSprite.setPosition(Gdx.graphics.getWidth() / 2 - achromaticSprite.getWidth() / 2, Gdx.graphics.getHeight() - 200);
   }
 
+  /**
+   * render
+   * called constantly once shown, updates all visual data in the screen
+   */
   @Override
   public void render(float delta) {
     Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -104,6 +121,11 @@ public class TitleScreen extends ScreenAdapter {
     game.batch.end();
   }
 
+  /**
+   * hide
+   * called on close
+   * disposes of all texture data
+   */
   @Override
   public void hide() {
     Gdx.input.setInputProcessor(null);

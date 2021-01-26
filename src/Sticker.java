@@ -3,6 +3,10 @@ import java.awt.Point;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.physics.box2d.Body;
 
+/**
+ * Sticker
+ * sticks to the edge of platforms, circles them rather than falling off
+ */
 class Sticker extends Enemy implements StickerAI {
   private int orientation;
   private boolean forward = true, below, beneath;
@@ -10,7 +14,16 @@ class Sticker extends Enemy implements StickerAI {
   private int bodyX, bodyY, tempX, tempY;
   private Point index, front, down, under;
 
-  
+
+  /**
+   * Sticker
+   * constructor
+   * @param point point of the sticker
+   * @param sprite sprite of the sticker
+   * @param body body of the sticker
+   * @param speed speed of the sticker
+   * @param orientation orientation of the sticker
+   */
   Sticker(Point point, Sprite sprite, Body body, int speed, int orientation) {
     super(point, sprite, body, speed);
     this.orientation = orientation;
@@ -30,6 +43,9 @@ class Sticker extends Enemy implements StickerAI {
     }
   }
 
+  /**
+   * move called periodically to update position and orientation
+   */
   public void move(Tile[][] levelMap) {
     if(clockwise){
       updateIndeces();
@@ -87,6 +103,10 @@ class Sticker extends Enemy implements StickerAI {
     }
   }
 
+  /**
+   * updateIndeces
+   * updates the indeces of the sticker
+   */
   public void updateIndeces(){
     if(this.orientation == 0){
       front.x = index.x+1;
@@ -119,9 +139,12 @@ class Sticker extends Enemy implements StickerAI {
     }
   }
 
+  /**
+   * setClockwise
+   * sets the direction of movement of the sticker
+   * @param clockwise
+   */
   public void setClockwise(boolean clockwise){
     this.clockwise = clockwise;
   }
-
 }
- // skipping blocks due to bodyX and Y cast to ints, cutting off decimal

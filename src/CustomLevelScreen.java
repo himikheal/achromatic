@@ -15,6 +15,10 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+/**
+ * CustomLevelScreen
+ * screen where you can type a 5 character code to play a custom level uploaded to the server
+ */
 public class CustomLevelScreen extends ScreenAdapter {
 
   ColourGame game;
@@ -28,10 +32,20 @@ public class CustomLevelScreen extends ScreenAdapter {
   private ObjectInputStream input;
   private ObjectOutputStream output;
 
+  /**
+   * CustomLevelScreen
+   * constructor
+   * @param game game value passed in reference
+   */
   public CustomLevelScreen(ColourGame game) {
     this.game = game;
   }
 
+  /**
+   * show
+   * called once on construction
+   * sets variable values and sprite positions
+   */
   @Override
   public void show() {
     playButtonSprite.setSize(174, 78);
@@ -44,6 +58,11 @@ public class CustomLevelScreen extends ScreenAdapter {
     }
   }
 
+  /**
+   * render
+   * called constantly once shown
+   * updates all visual data
+   */
   @Override
   public void render(float delta) {
     Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -178,11 +197,22 @@ public class CustomLevelScreen extends ScreenAdapter {
     game.batch.end();
   }
 
+  /**
+   * called on close
+   * closes the screen
+   */
   @Override
   public void hide() {
     
   }
 
+  /**
+   * connect
+   * connect to the server
+   * @param ip the ip
+   * @param port the port
+   * @return the socket connected
+   */
   public Socket connect(String ip, int port) {
     System.out.println("Attempting to make a connection..");
 
