@@ -137,7 +137,6 @@ public class CustomLevelScreen extends ScreenAdapter {
          && Gdx.input.getY() < Gdx.graphics.getHeight() - playButtonSprite.getY()
          && Gdx.input.getY() > (Gdx.graphics.getHeight() - playButtonSprite.getY()) - playButtonSprite.getHeight()
          && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-      System.out.println("CLICKE D");
       connect("127.0.0.1", 5000);
       try {
         output.writeObject("/DOWNLOAD!");

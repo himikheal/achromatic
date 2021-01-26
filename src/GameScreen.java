@@ -1,8 +1,8 @@
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.awt.Point;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -18,17 +18,17 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.badlogic.gdx.physics.box2d.Filter;
 
 /**
  * GameScreen
@@ -152,7 +152,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         return;
       }
       gameWorld.step(1f/60f, 6, 2);
-      System.out.println("hi");
 		  camera.position.set(player.getBody().getPosition().x * PIXELS_TO_METERS, player.getBody().getPosition().y * PIXELS_TO_METERS, 0);
 		  camera.update();
 
@@ -457,13 +456,11 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         reader = new BufferedReader(new FileReader(file));
         lvlH = Integer.parseInt(reader.readLine());
         lvlW = Integer.parseInt(reader.readLine());
-        System.out.println(lvlH + "\n" + lvlW);
         level = new String[lvlH][lvlW];
         for(int i = 0; i < lvlH; i++) {
           String st = reader.readLine();
           for(int j = 0; j < lvlW; j++) {
             level[i][j] = st.substring(0, st.indexOf(" "));
-            System.out.print(level[i][j]);
             try {
               st = st.substring(st.indexOf(" ") + 1, st.length());
             }catch(Exception e) {
@@ -475,14 +472,12 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
         levelMap = new Tile[lvlH][lvlW];
   
         for(int i = 0; i < lvlH; i++) {
-          System.out.println("");
           for(int j = 0; j < lvlW; j++) {
             String[] tileData = new String[4];
             String st = level[i][j];
             for(int k = 0; k < 4; k++) {
               tileData[k] = st.substring(k, k+1);
             }
-            System.out.print(tileData[0]);
   
             if(tileData[0].equals("#")){
               Texture tex = new Texture("assets/sprites/tileSprite" + tileData[3] + "_" + tileData[1] + ".png");
@@ -564,8 +559,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               bodyFix.restitution = 0.0f;
               bodyFix.filter.categoryBits = PLAYER;
               pBody.createFixture(bodyFix);
-              System.out.println(pBody.getPosition().x - 2048);
-              System.out.println(j);
 
               shape.dispose();
 
@@ -1041,7 +1034,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
           dead = true;
         }
         if(obj2 instanceof Solid || obj1 instanceof Solid){
-          System.out.println(a.getBody().getType() + " has hit " + b.getBody().getType());
           this.jumping = false;
         }
         if(obj2 instanceof Checkpoint || obj1 instanceof Checkpoint){
@@ -1092,8 +1084,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     public void endContact(Contact contact) {	
       Fixture a = contact.getFixtureA();	
       Fixture b = contact.getFixtureB();
-      System.out.println(a.getBody().getType() + " has stopped hitting " + b.getBody().getType());
-      System.out.println(jumping + "3");
     }
    
     /**

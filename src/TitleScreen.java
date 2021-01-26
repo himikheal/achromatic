@@ -4,11 +4,9 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class TitleScreen extends ScreenAdapter {
   private ColourGame game;
-  //private SpriteBatch batch;
   private Texture startButton = new Texture("assets/sprites/startButton.png");
   private Texture startButtonDown = new Texture("assets/sprites/startButtonDown.png");
   private Texture startButtonClicked = new Texture("assets/sprites/startButtonClicked.png");
@@ -34,7 +32,6 @@ public class TitleScreen extends ScreenAdapter {
 
   @Override
   public void show() {
-    
     startButtonSprite.setSize(256, 101);
     startButtonDownSprite.setSize(256, 101);
     startButtonClickedSprite.setSize(256, 101);
@@ -51,27 +48,6 @@ public class TitleScreen extends ScreenAdapter {
     customButtonDownSprite.setPosition(Gdx.graphics.getWidth()/2 , Gdx.graphics.getHeight()/2 - customButtonSprite.getHeight()*2);
     achromaticSprite.setSize(864, 120);
     achromaticSprite.setPosition(Gdx.graphics.getWidth() / 2 - achromaticSprite.getWidth() / 2, Gdx.graphics.getHeight() - 200);
-
-    //Gdx.input.setInputProcessor(new InputAdapter() {
-    //  @Override
-    //  public boolean keyDown(int keyCode) {
-    //    if (keyCode == Input.Keys.SPACE) {
-    //      game.setScreen(new GameScreen(game));
-    //    }
-    //    return true;
-    //  }
-    //});
-
-    /////if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) 
-    /////&& Gdx.input.getX() > startButtonSprite.getX() 
-    /////&& Gdx.input.getX() < startButtonSprite.getX() + startButtonSprite.getWidth() 
-    /////&& Gdx.input.getY() < startButtonSprite.getY() + startButtonSprite.getHeight() 
-    /////&& Gdx.input.getY() > startButtonSprite.getY()) {
-    /////  System.out.println("CLOICKED");
-    /////  game.setScreen(new GameScreen(game));
-    /////}
-
-
   }
 
   @Override

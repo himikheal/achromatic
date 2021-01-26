@@ -1,11 +1,11 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -377,10 +377,6 @@ public class EditorScreen extends ScreenAdapter {
       && Gdx.input.getX() < 1440
       && Gdx.input.getY() > 0
       && Gdx.input.getY() < 810) {
-        System.out.println("\nX: " + Gdx.input.getX());
-        System.out.println("Y: " + Gdx.input.getY());  
-        System.out.println("Grid X: " + (int)((Gdx.input.getX() - 630) / 16.2));
-        System.out.println("Grid Y: " + (int)(Gdx.input.getY() / 16.2));
         int gridX = (int)((Gdx.input.getX() - 630) / 16.2);
         int gridY = (int)(Gdx.input.getY() / 16.2);
         if((!(selected instanceof Spawn) || (selected instanceof Spawn && !spawnPlaced)) 
@@ -409,47 +405,40 @@ public class EditorScreen extends ScreenAdapter {
         if(Gdx.input.getX() > 16
         && Gdx.input.getX() < 80) {
           selected = new PushableBlock(null, new Sprite(boxSprite.getTexture()), null, 1);
-          System.out.println("TEST1");
           ((PushableBlock)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 96
              && Gdx.input.getX() < 160) {
           selected = new Checkpoint(null, new Sprite(checkpointSprite.getTexture()), null);
-          System.out.println("TEST2");
           moving = false;
         }
         else if(Gdx.input.getX() > 176
              && Gdx.input.getX() < 240
              && this.colour != 0) {
           selected = new ColourGiver(null, new Sprite(giverSprite.getTexture()), null, this.colour);
-          System.out.println("TEST3");
           ((ColourGiver)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 256
              && Gdx.input.getX() < 320) {
           selected = new ColourRemover(null, new Sprite(removerSprite.getTexture()), null);
-          System.out.println("TEST4");
           moving = false;
         }
         else if(Gdx.input.getX() > 336
              && Gdx.input.getX() < 400) {
           selected = new Spawn(null, new Sprite(spawnSprite.getTexture()), null);
-          System.out.println("TEST5");
           moving = false;
         }
         else if(Gdx.input.getX() > 416
              && Gdx.input.getX() < 480) {
           selected = new Spikes(null, new Sprite(spikesSprite.getTexture()), null);
-          System.out.println("TEST6");
           ((Spikes)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 496
              && Gdx.input.getX() < 560) {
           selected = new Solid(null, new Sprite(tileSprite.getTexture()), null);
-          System.out.println("TEST7");
           ((Solid)selected).setColour(this.colour);
           moving = false;
         }
@@ -459,49 +448,42 @@ public class EditorScreen extends ScreenAdapter {
         if(Gdx.input.getX() > 16
         && Gdx.input.getX() < 80) {
           selected = new BrokenBlock(null, new Sprite(brokenSprite.getTexture()), null, 1);
-          System.out.println("TEST1");
           ((BrokenBlock)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 96
              && Gdx.input.getX() < 160) {
           selected = new MovingBlock(null, new Sprite(moveSprite.getTexture()), null, null);
-          System.out.println("TEST2");
           ((MovingBlock)selected).setColour(this.colour);
           moving = true;
         }
         else if(Gdx.input.getX() > 176
              && Gdx.input.getX() < 240) {
           selected = new SlipperyBlock(null, new Sprite(iceSprite.getTexture()), null);
-          System.out.println("TEST3");
           ((SlipperyBlock)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 256
              && Gdx.input.getX() < 320) {
           selected = new CrushingBlock(null, new Sprite(crushSprite.getTexture()), null, 1, null);
-          System.out.println("TEST4");
           ((CrushingBlock)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 336
              && Gdx.input.getX() < 400) {
           selected = new Floater(null, new Sprite(floatSprite.getTexture()), null, null);
-          System.out.println("TEST5");
           ((Floater)selected).setColour(this.colour);
           moving = true;
         }
         else if(Gdx.input.getX() > 416
              && Gdx.input.getX() < 480) {
           selected = new Sticker(null, new Sprite(stickSprite.getTexture()), null, 1, 0);
-          System.out.println("TEST6");
           ((Sticker)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 496
              && Gdx.input.getX() < 560) {
           selected = new Walker(null, new Sprite(walkSprite.getTexture()), null, null);
-          System.out.println("TEST7");
           ((Walker)selected).setColour(this.colour);
           moving = true;
         }
@@ -511,14 +493,12 @@ public class EditorScreen extends ScreenAdapter {
         if(Gdx.input.getX() > 16
         && Gdx.input.getX() < 80) {
           selected = new Goal(null, new Sprite(goalSprite.getTexture()), null, 1);
-          System.out.println("TEST1");
           ((Goal)selected).setColour(this.colour);
           moving = false;
         }
         else if(Gdx.input.getX() > 96
              && Gdx.input.getX() < 160) {
           selected = null;
-          System.out.println("CLEAR");
           moving = false;
         }
       }
@@ -596,7 +576,6 @@ public class EditorScreen extends ScreenAdapter {
         && Gdx.input.getX() < 496) {
           backwards = 9;
         }
-
         if(forwards < 9 && backwards < 9) {
           if(selected instanceof MovingBlock) {
             ((MovingBlock)selected).setPoints(new int[]{backwards, forwards});
@@ -614,37 +593,30 @@ public class EditorScreen extends ScreenAdapter {
         if(Gdx.input.getY() > Gdx.graphics.getHeight() - 744 - 50
         && Gdx.input.getY() < Gdx.graphics.getHeight() - 744) {
           this.colour = 0;
-          System.out.println("COLOUR0");
         }
         else if(Gdx.input.getY() > Gdx.graphics.getHeight() - 694 - 50
              && Gdx.input.getY() < Gdx.graphics.getHeight() - 694) {
           this.colour = 1;
-          System.out.println("COLOUR1");
         }
         else if(Gdx.input.getY() > Gdx.graphics.getHeight() - 644 - 50
              && Gdx.input.getY() < Gdx.graphics.getHeight() - 644) {
           this.colour = 2;
-          System.out.println("COLOUR2");
         }
         else if(Gdx.input.getY() > Gdx.graphics.getHeight() - 594 - 50
              && Gdx.input.getY() < Gdx.graphics.getHeight() - 594) {
           this.colour = 3;
-          System.out.println("COLOUR3");
         }
         else if(Gdx.input.getY() > Gdx.graphics.getHeight() - 544 - 50
              && Gdx.input.getY() < Gdx.graphics.getHeight() - 544) {
           this.colour = 4;
-          System.out.println("COLOUR4");
         }
         else if(Gdx.input.getY() > Gdx.graphics.getHeight() - 494 - 50
              && Gdx.input.getY() < Gdx.graphics.getHeight() - 494) {
           this.colour = 5;
-          System.out.println("COLOUR5");
         }
         else if(Gdx.input.getY() > Gdx.graphics.getHeight() - 444 - 50
              && Gdx.input.getY() < Gdx.graphics.getHeight() - 444) {
           this.colour = 6;
-          System.out.println("COLOUR6");
         }
         boxSprite.setTexture(boxTextures[colour]);
         giverSprite.setTexture(giverTextures[colour]);
@@ -666,20 +638,16 @@ public class EditorScreen extends ScreenAdapter {
       && goalPlaced) {
         if(Gdx.input.getX() > 10   
         && Gdx.input.getX() < 184){
-          System.out.println("PLAYED");
           writeToFile(map, "tempMap");
           game.setScreen(new GameScreen(game, "tempMap.txt"));
         }
         else if(Gdx.input.getX() > 200
              && Gdx.input.getX() < 446) {
-          System.out.println("UPLOAD");
           writeToFile(map, "uploadMap");
           connect("127.0.0.1", 5000);
           try {
             output.writeObject("/UPLOAD!");
             File tempFile = new File("assets/levels/uploadMap.txt");
-            
-            System.out.println(tempFile.getAbsolutePath());
             byte[] fileBytes = Files.readAllBytes(tempFile.toPath());
             output.writeObject(fileBytes);
             String o = (String) input.readObject();
@@ -744,7 +712,6 @@ public class EditorScreen extends ScreenAdapter {
    * @param y stands for the y value at which the menu will be drawn
    */
   public void drawMenu(float y) {
-    System.out.println("ash");
     Sprite[] menuUp = new Sprite[10];
     menuUp[0] = new Sprite(zero);
     menuUp[1] = new Sprite(one);
@@ -778,7 +745,6 @@ public class EditorScreen extends ScreenAdapter {
       reader = new BufferedReader(new FileReader(file));
       lvlH = Integer.parseInt(reader.readLine());
       lvlW = Integer.parseInt(reader.readLine());
-      System.out.println(lvlH + "\n" + lvlW);
       level = new String[lvlH][lvlW];
       for(int i = 0; i < lvlH; i++){
         String st = reader.readLine();
@@ -793,15 +759,12 @@ public class EditorScreen extends ScreenAdapter {
       }
 
       for(int i = 0; i < lvlH; i++){
-        System.out.println("");
         for(int j = 0; j < lvlW; j++){
           String[] tileData = new String[4];
           String st = level[i][j];
           for(int k = 0; k < 4; k++){
             tileData[k] = st.substring(k, k+1);
           }
-          System.out.print(tileData[0]);
-
           if(tileData[0].equals("#")){
             Texture tex = new Texture("assets/sprites/tileSprite" + tileData[3] + "_" + tileData[1] + ".png");
             Sprite sprite = new Sprite(tex);
@@ -976,7 +939,6 @@ public class EditorScreen extends ScreenAdapter {
       
     }catch(IOException e){
       System.out.println("File not found");
-      e.printStackTrace();
     }
   }
 
@@ -1172,11 +1134,6 @@ public class EditorScreen extends ScreenAdapter {
           firstVEnd = false;
         }
       }
-      System.out.println(hasTilesH[0] + " " + hasTilesH[1]);
-      System.out.println(hasTilesV[0] + " " + hasTilesV[1]);
-      System.out.println("H DIST: " + (hasTilesH[1] - hasTilesH[0]));
-      System.out.println("V DIST: " + (hasTilesV[1] - hasTilesV[0]));
-
 
       PrintWriter writer = new PrintWriter("assets/levels/" + fileName + ".txt", "UTF-8");
       writer.println(hasTilesH[1] + 1 - hasTilesH[0]);
