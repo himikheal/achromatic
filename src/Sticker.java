@@ -49,8 +49,7 @@ class Sticker extends Enemy implements StickerAI {
           this.orientation++;
         }
         updateIndeces();
-      }
-      
+      }    
       
       if(!forward && (beneath || below)){
         this.getBody().setLinearVelocity(front.x - index.x, index.y - front.y);
@@ -74,12 +73,8 @@ class Sticker extends Enemy implements StickerAI {
         tempY = Math.round(bodyY + (index.y - front.y)); 
       }
       
-      
       bodyX = Math.round(this.getBody().getPosition().x);
       bodyY = Math.round(this.getBody().getPosition().y);
-
-
-
 
       if(bodyX == tempX && bodyY == tempY){
         
