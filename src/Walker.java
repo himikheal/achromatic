@@ -6,7 +6,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 class Walker extends Enemy implements WalkerAI {
 private int[] patrol;
 private float initX;
-boolean direction = true;
+private boolean direction = true;
 
   Walker(Point point, Sprite sprite, Body body, int[] patrol) {
     super(point, sprite, body, 1);

@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class TitleScreen extends ScreenAdapter {
-  ColourGame game;
+  private ColourGame game;
   //private SpriteBatch batch;
   private Texture startButton = new Texture("assets/sprites/startButton.png");
   private Texture startButtonDown = new Texture("assets/sprites/startButtonDown.png");

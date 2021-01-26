@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.Gdx;
 
-public class ColourGame extends Game { //implements ApplicationListener, ContactListener{
+public class ColourGame extends Game { 
 	SpriteBatch batch;
-  ShapeRenderer shapeRenderer;
-	BitmapFont font;
-	Music background;
+  private ShapeRenderer shapeRenderer;
+	private BitmapFont font;
+	private Music background;
 
 	public void create () {
 		batch = new SpriteBatch();

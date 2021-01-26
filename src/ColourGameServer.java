@@ -13,10 +13,10 @@ import java.util.Set;
 
 class ColourGameServer {
   
-  ServerSocket serverSock;// server socket for connection
-  static Boolean running = true; // controls if the server is accepting clients
-  HashMap<String, File> fileMap = new HashMap<>();
-  Set<String> fileSet = fileMap.keySet();
+  private ServerSocket serverSock;// server socket for connection
+  private static Boolean running = true; // controls if the server is accepting clients
+  private HashMap<String, File> fileMap = new HashMap<>();
+  private Set<String> fileSet = fileMap.keySet();
   /**
    * Main
    * @param args parameters from command line

@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class LevelScreen extends ScreenAdapter {
 
-  ColourGame game;
+  private ColourGame game;
 
   private Texture levelOne = new Texture("assets/sprites/Idle 1.png");
   private Texture levelTwo = new Texture("assets/sprites/Idle 2.png");
