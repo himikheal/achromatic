@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
 
+/**
+ * ColourGameServer
+ * server for the game to connect to for level uploading
+ */
 class ColourGameServer {
   
   private ServerSocket serverSock;// server socket for connection
@@ -32,12 +36,10 @@ class ColourGameServer {
   public void go() {
     System.out.println("Waiting for a client connection..");
     Socket client = null;// hold the client connection
-    //Socket clientUpdater = null;
     try {
       serverSock = new ServerSocket(5000); // assigns an port to the server
       while (running) {  // this loops to accept multiple clients
         client = serverSock.accept(); // wait for connection
-        //clientUpdater = serverSock.accept();
         System.out.println("Client connected");
         Thread t = new Thread(new ConnectionHandler(client)); // create a thread for the new client and pass in the socket
         t.start(); // start the new thread

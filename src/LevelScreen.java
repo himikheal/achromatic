@@ -5,6 +5,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+/**
+ * LevelScreen
+ * screen class for selecting levels
+ */
 public class LevelScreen extends ScreenAdapter {
 
   private ColourGame game;
@@ -31,10 +35,21 @@ public class LevelScreen extends ScreenAdapter {
   private Sprite levelFiveDownSprite = new Sprite(levelFiveDown);
 
 
+  /**
+   * LevelScreen
+   * constructor for levelscreen
+   * takes in game reference
+   * @param game reference to game
+   */
   public LevelScreen(ColourGame game) {
     this.game = game;
   }
 
+  /**
+   * show
+   * called on initialization
+   * draws everything
+   */
   @Override
   public void show() {
     levelOneSprite.setSize(64, 64);
@@ -60,6 +75,11 @@ public class LevelScreen extends ScreenAdapter {
 
   }
 
+  /**
+   * render
+   * called constantly
+   * draws and updates everything on the screen
+   */
   @Override
   public void render(float delta) {
     Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -140,6 +160,11 @@ public class LevelScreen extends ScreenAdapter {
     game.batch.end();
   }
 
+  /**
+   * hide
+   * called on close of screen
+   * disposes of all textures
+   */
   @Override
   public void hide() {
     Gdx.input.setInputProcessor(null);

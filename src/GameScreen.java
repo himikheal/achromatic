@@ -6,7 +6,6 @@ import java.awt.Point;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.backends.headless.mock.audio.MockAudio;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,7 +14,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -24,28 +22,23 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-
-import org.lwjgl.Sys;
-
 import com.badlogic.gdx.physics.box2d.Filter;
-import com.badlogic.gdx.physics.box2d.RayCastCallback;
 
-import androidx.core.view.accessibility.AccessibilityViewCommand.SetSelectionArguments;
-
+/**
+ * GameScreen
+ * the main screen of the game, where the gameplay takes place
+ */
 public class GameScreen extends ScreenAdapter implements ContactListener{
 
     private ColourGame game;
     private SpriteBatch batch;
-	  private Texture img;
 	  private World gameWorld;
-	  private Body screenEdge;
 	  private Box2DDebugRenderer debug;
 	  private Matrix4 matrix;
 	  private OrthographicCamera camera;
@@ -53,7 +46,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 	  private String[][] level;
     private Tile[][] levelMap;
     private Player player;
-    private File levelFile;
     private Texture background = new Texture("assets/sprites/gameBackground.png");
     private Sprite back = new Sprite(new Texture("assets/sprites/back.png"));
     private boolean jumping = false;
@@ -72,16 +64,25 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     final short SENSOR = 0x0040;
 
 	  private float torque = 0.0f;
-	  private boolean drawSprite = true;
   
 	  private final float PIXELS_TO_METERS = 64f;
 	  private final float MAX_VELOCITY = 5f;
 
+    /**
+     * Gamescreen
+     * constructor for gamescreen
+     * @param game game reference passed in
+     * @param levelName name of level loaded
+     */
     public GameScreen(ColourGame game, String levelName) {
       this.game = game;
       this.levelName = levelName;
     }
 
+    /**
+     * show
+     * called on construction, initializes all class variables and settings
+     */
     @Override
     public void show() {
       back.setPosition(16, Gdx.graphics.getHeight() - 80);
@@ -90,7 +91,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       gameWorld = new World(new Vector2(0, -15f), true);
       gameWorld.setContactListener(this);
   
-      //loadMap(new File("assets/levels/level_" + lvlNum + ".txt"));
       loadMap(new File("assets/levels/" + levelName));
       debug = new Box2DDebugRenderer();
       font = new BitmapFont();
@@ -98,6 +98,11 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
+    /**
+     * render
+     * called constantly when screen is loaded
+     * draws all on screen and updates
+     */
     @Override
     public void render(float delta) {
       Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -212,6 +217,10 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       
     }
 
+    /**
+     * updateMoving
+     * method to update all the moving blocks in the level
+     */
     public void updateMoving(){
       for(Tile[] tiles: levelMap){
         for(Tile tile: tiles){
@@ -311,6 +320,11 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       }
     }
 
+    /**
+     * updateBroken
+     * method to update brokenblocks in the level, passes in time
+     * @param time time passed into the method
+     */
     public void updateBroken(float time){
       for(Tile[] tiles: levelMap){
         for(Tile tile: tiles){
@@ -340,6 +354,10 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       }
     }
 
+    /**
+     * updateMap
+     * method to update all other blocks of the map, based on colour
+     */
     public void updateMap(){
       for(Tile[] tiles: levelMap){
         for(Tile tile: tiles){
@@ -428,6 +446,11 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       }
     }
 
+    /**
+     * loadMap
+     * method to load map from a file into a tile[][]
+     * @param file file loaded
+     */
     public void loadMap(File file){
       BufferedReader reader;
       try{
@@ -550,28 +573,6 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               player.getBody().setUserData(player);
 
             }
-            //if(tileData[0].equals("~")){
-            //  Texture tex = new Texture("assets/sprites/airSprite_" + tileData[1] + ".png");
-            //  Sprite sprite = new Sprite(tex);
-            //  sprite.setPosition(j / PIXELS_TO_METERS, i / PIXELS_TO_METERS);
-            //  Body body;
-            //  BodyDef def = new BodyDef();
-            //  def.type = BodyDef.BodyType.StaticBody;
-            //  def.position.set((sprite.getX() + sprite.getWidth()/2)*PIXELS_TO_METERS, (sprite.getY() + sprite.getHeight()/2)*PIXELS_TO_METERS);
-            //  body = gameWorld.createBody(def);
-  //
-            //  PolygonShape shape = new PolygonShape();
-            //  shape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS, sprite.getHeight() / 2 / PIXELS_TO_METERS);
-            //  FixtureDef fix = new FixtureDef();
-            //  fix.shape = shape;
-//
-  //
-            //  body.createFixture(fix).setSensor(true);
-            //  shape.dispose();
-//
-            //  levelMap[i][j] = new Air(new Point(i, j), sprite, body);
-            //  levelMap[i][j].getBody().setUserData(levelMap[i][j]);
-            //}
             if(tileData[0].equals("G")){
               Texture tex = new Texture("assets/sprites/giverSprite_" + tileData[3] + ".png");
               Sprite sprite = new Sprite(tex);
@@ -1014,14 +1015,22 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       }
     }
 
+    /**
+     * hide
+     * called on close
+     * calles super.hide
+     */
     @Override
     public void hide() {
       super.hide();
       Gdx.input.setInputProcessor(null);
-      //img.dispose();
-		  //gameWorld.dispose();
     }
 
+    /**
+     * beginContact
+     * contact listening callback for physics bodies
+     * sets different values depending on instances of the contact
+     */
     public void beginContact(Contact contact) {
       Fixture a = contact.getFixtureA();
       Fixture b = contact.getFixtureB();
@@ -1045,20 +1054,9 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
           }
         }
         if(obj2 instanceof Goal || obj1 instanceof Goal){
-          //if(obj2 instanceof Goal){
-          //  gameWorld.destroyBody(((Player)obj1).getBody());
-          //  gameWorld.destroyBody(((Tile)obj2).getBody());
-          //  ((Tile)obj2).setBody(null);
-          //  ((Player)obj1).setBody(null);
-          //}else{
-          //  gameWorld.destroyBody(((Tile)obj1).getBody());
-          //  gameWorld.destroyBody(((Player)obj2).getBody());
-          //  ((Tile)obj1).setBody(null);
-          //  ((Player)obj2).setBody(null);
-          //}
+
           nextLevel = true;
-          //this.dispose();
-          //game.setScreen(new GameScreen(game, "level_" + ((Integer.parseInt(levelName.substring(levelName.indexOf("_") + 1, levelName.indexOf("."))))+1) + ".txt"));
+
         }
         if(obj2 instanceof ColourGiver || obj1 instanceof ColourGiver){
           if(obj2 instanceof ColourGiver){
@@ -1085,7 +1083,12 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 
       }
     }
-   
+
+    /**
+     * endContact
+     * method called at the end of contact
+     * also interacts with variables depending on contact
+     */
     public void endContact(Contact contact) {	
       Fixture a = contact.getFixtureA();	
       Fixture b = contact.getFixtureB();
@@ -1093,9 +1096,17 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
       System.out.println(jumping + "3");
     }
    
+    /**
+     * preSolve
+     * void, from callback interface
+     */
     public void preSolve(Contact contact, Manifold oldManifold) {		
     }
    
+    /**
+     * postSolve
+     * void, from callback interface
+     */
     public void postSolve(Contact contact, ContactImpulse impulse) {		
     }
 }

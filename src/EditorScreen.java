@@ -16,13 +16,16 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Vector2;
 
+/**
+ * EditorScreen
+ * screen to encompass the level editor
+ * contains "buttons" to represent different blocks and enemies, as well as 
+ * an upload button and a playtest button
+ */
 public class EditorScreen extends ScreenAdapter {
 
   private ColourGame game;
@@ -156,28 +159,6 @@ public class EditorScreen extends ScreenAdapter {
   private Sprite walkSprite = new Sprite(walker);
   private Sprite goalSprite = new Sprite(goal);
 
-  //Sprite zeroUpSprite = new Sprite(zero);
-  //Sprite oneUpSprite = new Sprite(one);
-  //Sprite twoUpSprite = new Sprite(two);
-  //Sprite threeUpSprite = new Sprite(three);
-  //Sprite fourUpSprite = new Sprite(four);
-  //Sprite fiveUpSprite = new Sprite(five);
-  //Sprite sixUpSprite = new Sprite(six);
-  //Sprite sevenUpSprite = new Sprite(seven);
-  //Sprite eightUpSprite = new Sprite(eight);
-  //Sprite nineUpSprite = new Sprite(nine);
-
-  //Sprite zeroDownSprite = new Sprite(zeroDown);
-  //Sprite oneDownSprite = new Sprite(oneDown);
-  //Sprite twoDownSprite = new Sprite(twoDown);
-  //Sprite threeDownSprite = new Sprite(threeDown);
-  //Sprite fourDownSprite = new Sprite(fourDown);
-  //Sprite fiveDownSprite = new Sprite(fiveDown);
-  //Sprite sixDownSprite = new Sprite(sixDown);
-  //Sprite sevenDownSprite = new Sprite(sevenDown);
-  //Sprite eightDownSprite = new Sprite(eightDown);
-  //Sprite nineDownSprite = new Sprite(nineDown);
-
   private Sprite uploadButtonSprite = new Sprite(uploadButton);
   private int colour = 0;
   private Texture[] boxTextures = new Texture[7];
@@ -210,15 +191,32 @@ public class EditorScreen extends ScreenAdapter {
   private ObjectInputStream input;
   private ObjectOutputStream output;
 
+  /**
+   * EditorScreen
+   * constructor for the editorscreen
+   * passes in the ColourGame reference
+   * @param game reference to the game object
+   */
   EditorScreen(ColourGame game) {
     this.game = game;
   }
 
+  /**
+   * EditorScreen
+   * alternate constructor for when escape is pressed in a gameScreen
+   * @param game reference to the game object
+   * @param file file wanted to be loaded into the editor
+   */
   EditorScreen(ColourGame game, File file) {
     this.game = game;
     loadMap(file);
   }
 
+  /**
+   * show
+   * automatically runs once after constructor is called
+   * contains all the information for initializing class variables and drawing sprite positions
+   */
   @Override
   public void show() {
 
@@ -330,6 +328,12 @@ public class EditorScreen extends ScreenAdapter {
     goalTextures[6] = goalP;
   }
 
+  /**
+   * render
+   * method called constantly when screen is instantiated
+   * contains all instructions for drawing to the screen and updating position of sprites and such
+   * the main loop of a screen
+   */
   @Override
   public void render(float delta) {
     Gdx.gl.glClearColor(255, 255, 255, 1);
@@ -656,97 +660,14 @@ public class EditorScreen extends ScreenAdapter {
         goalSprite.setTexture(goalTextures[colour]);
       }
 
-
-      //else if(Gdx.input.getX() > 200
-      //&& Gdx.input.getX() < 446) {
-      //  System.out.println("UPLOAD");
-      //  try {
-      //    PrintWriter writer = new PrintWriter("assets/levels/uploadMap.txt", "UTF-8");
-
       if(Gdx.input.getY() < Gdx.graphics.getHeight() - 10
       && Gdx.input.getY() > Gdx.graphics.getHeight() - 88
       && spawnPlaced 
       && goalPlaced) {
-        if(Gdx.input.getX() > 10    //HEIGHT 78
+        if(Gdx.input.getX() > 10   
         && Gdx.input.getX() < 184){
           System.out.println("PLAYED");
           writeToFile(map, "tempMap");
-          //try {
-          //  PrintWriter writer = new PrintWriter("assets/levels/tempMap.txt", "UTF-8");
-          //  writer.println("50");
-          //  writer.println("50");
-          //  for(int i = 0; i < map.length; i++) {
-          //    for(int j = 0; j < map.length; j++) {
-          //      if(map[j][i] instanceof Spawn) {
-          //        writer.print("$000");
-          //      }
-          //      else if(map[j][i] instanceof Checkpoint) {
-          //        writer.print("*000");
-          //      }
-          //      else if(map[j][i] instanceof ColourRemover) {
-          //        writer.print("R000");
-          //      }
-          //      else if(map[j][i] instanceof ColourGiver) {
-          //        writer.print("G" + ((ColourGiver)map[j][i]).getColour() + "0" + ((ColourGiver)map[j][i]).getColour());
-          //      }
-          //      else if(map[j][i] instanceof Sticker) {
-          //        writer.print("&10" + ((Sticker)map[j][i]).getColour());
-          //      }
-          //      else if(map[j][i] instanceof MovingBlock) {
-          //        writer.print("-" + ((MovingBlock)map[j][i]).getPoints()[0] + ((MovingBlock)map[j][i]).getPoints()[1] + ((MovingBlock)map[j][i]).getColour());
-          //      }
-          //      else if(map[j][i] instanceof Floater) {
-          //        writer.print("f" + ((Floater)map[j][i]).getPoints()[0] + ((Floater)map[j][i]).getPoints()[1] + ((Floater)map[j][i]).getColour());
-          //      }
-          //      else if(map[j][i] instanceof Walker) {
-          //        writer.print("w" + ((Walker)map[j][i]).getPatrol()[0] + ((Walker)map[j][i]).getPatrol()[1] + ((Walker)map[j][i]).getColour());
-          //      }
-          //      else if(map[j][i] == null) {
-          //        writer.print("~100");
-          //      }
-          //      else {
-          //        for(int k = 0; k < tileTypes.length; k++) {
-          //          if(map[j][i].getClass() == tileTypes[k].getClass()) {
-          //            int solid = 2;
-          //            if(map[j][i] instanceof Solid) {
-          //              if(((Solid)map[j][i]).getColour() == 0) {
-          //                solid = 1;
-          //              }
-          //            }
-          //            else if(map[j][i] instanceof Goal) {
-          //              if(((Goal)map[j][i]).getColour() == 0) {
-          //                solid = 1;
-          //              }
-          //            }
-          //            //if(((Solid)map[j][i]).getColour() == 0) {
-          //            //  solid = 1;
-          //            //}
-          //            if(map[j][i] instanceof CrushingBlock) {
-          //              writer.print(tileChars[k] + solid + "3" + ((Solid)map[j][i]).getColour());
-          //            }
-          //            if(map[j][i] instanceof BrokenBlock) {
-          //              writer.print(tileChars[k] + solid + "2" + ((Solid)map[j][i]).getColour());
-          //            }
-          //            if(map[j][i] instanceof Goal) {
-          //              writer.print(tileChars[k] + solid + "2" + ((Goal)map[j][i]).getColour());
-          //            }
-          //            else {
-          //              writer.print(tileChars[k] + solid + "0" + ((Solid)map[j][i]).getColour());
-          //            }
-          //          }
-          //        }
-          //      }
-          //      writer.print(" ");
-          //    }
-          //    writer.println("");
-          //  }
-          //  writer.close();
-          //  game.setScreen(new GameScreen(game, "tempMap.txt"));
-          //} catch (FileNotFoundException e) {
-          //  System.out.println("File not found");
-          //} catch (UnsupportedEncodingException e2) {
-          //  System.out.println("Unsupported encoding");
-          //}
           game.setScreen(new GameScreen(game, "tempMap.txt"));
         }
         else if(Gdx.input.getX() > 200
@@ -816,6 +737,12 @@ public class EditorScreen extends ScreenAdapter {
     game.batch.end();
   }
 
+  /**
+   * drawMenu
+   * method to draw the menu shown when selecting a tile that has additional parameters
+   * ie a floater or moving platform
+   * @param y stands for the y value at which the menu will be drawn
+   */
   public void drawMenu(float y) {
     System.out.println("ash");
     Sprite[] menuUp = new Sprite[10];
@@ -837,12 +764,16 @@ public class EditorScreen extends ScreenAdapter {
     
   }
 
+  /**
+   * loadMap
+   * method called when using alternate constructor, loads file called in constructor into editor
+   * @param file file passed in from the alternate constructor
+   */
   public void loadMap(File file){
     spawnPlaced = true;
     goalPlaced = true;
     BufferedReader reader;
     String[][] level;
-    //Tile[][] levelMap;
     try{
       reader = new BufferedReader(new FileReader(file));
       lvlH = Integer.parseInt(reader.readLine());
@@ -853,7 +784,6 @@ public class EditorScreen extends ScreenAdapter {
         String st = reader.readLine();
         for(int j = 0; j < lvlW; j++){
           level[i][j] = st.substring(0, st.indexOf(" "));
-          //System.out.print(level[i][j]);
           try{
             st = st.substring(st.indexOf(" ") + 1, st.length());
           }catch(Exception e){
@@ -861,8 +791,6 @@ public class EditorScreen extends ScreenAdapter {
           }
         }
       }
-      
-      //levelMap = new Tile[lvlH][lvlW];
 
       for(int i = 0; i < lvlH; i++){
         System.out.println("");
@@ -1052,6 +980,11 @@ public class EditorScreen extends ScreenAdapter {
     }
   }
 
+  /**
+   * hide
+   * called on close of the screen
+   * contains instructions to dispose of all the textures initialized
+   */
   @Override
   public void hide() {
     zero.dispose(); 
@@ -1163,6 +1096,13 @@ public class EditorScreen extends ScreenAdapter {
     goalP.dispose();  
   }
 
+  /**
+   * connect
+   * method for connecting to the server, for level uploading
+   * @param ip the ip of the server
+   * @param port port of the server
+   * @return socket the socket used to connect to the server
+   */
   public Socket connect(String ip, int port) {
     System.out.println("Attempting to make a connection..");
 
@@ -1181,6 +1121,12 @@ public class EditorScreen extends ScreenAdapter {
     return socket;
   }
 
+  /**
+   * writeToFile
+   * writes the editor plane to a file while minimizing the size of the text file to encompass only the area added by the player
+   * @param map map to write to a file
+   * @param fileName name of the file to write to
+   */
   public void writeToFile(Tile[][] map, String fileName) {
     try {
       int[] hasTilesH = new int[2];
@@ -1278,9 +1224,6 @@ public class EditorScreen extends ScreenAdapter {
                     solid = 1;
                   }
                 }
-                //if(((Solid)map[j][i]).getColour() == 0) {
-                //  solid = 1;
-                //}
                 if(map[j][i] instanceof CrushingBlock) {
                   writer.print(tileChars[k] + solid + "3" + ((Solid)map[j][i]).getColour());
                 }
@@ -1307,5 +1250,4 @@ public class EditorScreen extends ScreenAdapter {
       System.out.println("Unsupported encoding");
     }
   }
-
 }
