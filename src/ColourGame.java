@@ -18,7 +18,7 @@ public class ColourGame extends Game { //implements ApplicationListener, Contact
 		font = new BitmapFont();
 		setScreen(new TitleScreen(this));
 		background = Gdx.audio.newMusic(Gdx.files.internal("assets/audio/background.mp3"));
-		background.setVolume(0.2f);
+		background.setVolume(0.1f);
 		background.setLooping(true);
 		background.play();
 	}

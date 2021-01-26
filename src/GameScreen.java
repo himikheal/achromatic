@@ -527,7 +527,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
               //pShape.setAsBox(sprite.getWidth() / 2 / PIXELS_TO_METERS / 2, sprite.getHeight() / 2.2f / PIXELS_TO_METERS);
 
               Vector2 coord = new Vector2(sprite.getWidth()/2/PIXELS_TO_METERS, sprite.getHeight()/2/PIXELS_TO_METERS);
-              Vector2[] verts = new Vector2[]{new Vector2(coord.x-0.2f, coord.y), new Vector2(coord.x-0.8f, coord.y), new Vector2(coord.x-0.8f, coord.y-0.98f), new Vector2(coord.x-0.5f, coord.y-1), new Vector2(coord.x-0.2f, coord.y-0.98f)};
+              Vector2[] verts = new Vector2[]{new Vector2(coord.x-0.2f, coord.y-0.1f), new Vector2(coord.x-0.8f, coord.y-0.1f), new Vector2(coord.x-0.8f, coord.y-0.98f), new Vector2(coord.x-0.5f, coord.y-1), new Vector2(coord.x-0.2f, coord.y-0.98f)};
 
               pShape.set(verts);
   
