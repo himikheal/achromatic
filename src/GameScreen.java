@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -53,6 +54,7 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     Tile[][] levelMap;
     Player player;
     File levelFile;
+    Texture background = new Texture("assets/sprites/gameBackground.png");
     Sprite back = new Sprite(new Texture("assets/sprites/back.png"));
     boolean jumping = false;
     boolean dead = false;
@@ -98,7 +100,12 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
     }
 
     @Override
-    public void render(float delta) { 
+    public void render(float delta) {
+      Gdx.gl.glClearColor(0, 0, 0, 1);
+		  Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+      game.batch.begin();
+      game.batch.draw(background, 0, 0);
+      game.batch.end();
       updateBroken(Gdx.graphics.getDeltaTime());
       updateMoving();
       if(dead){
@@ -149,12 +156,9 @@ public class GameScreen extends ScreenAdapter implements ContactListener{
 		  player.getSprite().setPosition((player.getBody().getPosition().x * PIXELS_TO_METERS) - player.getSprite().getWidth()/2, (player.getBody().getPosition().y * PIXELS_TO_METERS) - player.getSprite().getHeight()/2);
 		  player.getSprite().setRotation((float)Math.toDegrees(player.getBody().getAngle()));
 
-		  Gdx.gl.glClearColor(0, 0, 0, 1);
-		  Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 		  batch.setProjectionMatrix(camera.combined);
 		  matrix = batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, PIXELS_TO_METERS, 0);
-		  batch.begin();
+      batch.begin();
 
 		  for(int i = 0; i < levelMap.length; i++){
 		  	for(int j = 0; j < levelMap[0].length; j++){
